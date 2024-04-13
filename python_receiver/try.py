@@ -76,7 +76,7 @@ class InputChunkProtocol(asyncio.Protocol):
 
         #### Run to completion state machine, non blocking
 
-        if x.max(0) > trigger_volume and not samp:
+        if x.max(0) >= trigger_volume and not samp:
             # Too loud, start listening for <listening_for>
             samp = True
 
@@ -166,6 +166,7 @@ while True:
 
     try:
         event.set()
+        time.sleep(1)   # Give OS time to start other processes at startup
         
         mqttc.on_message = on_message
         mqttc.on_connect = on_connect
@@ -194,6 +195,7 @@ while True:
         audio_queue = Queue()
         time.sleep(5)
     
+
     except KeyboardInterrupt:
 
         print("Exiting...")
@@ -204,6 +206,7 @@ while True:
         mqttc.loop_stop()
         loop.close()
         break
+
 
     except serial.SerialException:
 

@@ -1,1 +1,1 @@
-# Speech_recognition via the Nordic nrf52 PDM microphone
+## Speech recognition via the Nordic nrf52 PDM microphone
