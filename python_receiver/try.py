@@ -24,6 +24,7 @@ z = np.array([], np.int16)
 
 # Serial COMM
 serial_port = "<COM or /dev/tty>"
+baudrate = 115200
 
 # Threading controls
 audio_queue = Queue()
@@ -49,7 +50,7 @@ N = seconds_to_reset * conversion * bufsize     # == [seconds] of recording (alm
 samp = False
 i = 0
 listening_for = 2   # * conversion == [second/bufsize]
-trigger_volume = 20000      # If the audio samples have magnitude greater than this start listening
+trigger_volume = 20000  # If the audio samples have magnitude greater than this start listening
 
 
 
@@ -59,8 +60,8 @@ class InputChunkProtocol(asyncio.Protocol):
         self.transport = transport
 
     def data_received(self, data):
-        # Create numpy buffer
         global conversion
+        global bufsize
         global listening_for
         global y
         global samp
@@ -82,12 +83,12 @@ class InputChunkProtocol(asyncio.Protocol):
 
         if samp == True and i <= listening_for * conversion:
             # Collect also the second before the activation
-            if i == 0 and y.size > conversion * x.size: z = np.append(z, y[-(conversion + 1) * x.size:-x.size], axis=0)
+            if i == 0 and y.size > conversion * bufsize: z = np.append(z, y[-(conversion + 1) * bufsize:-bufsize], axis=0)
             z = np.append(z, x, axis=0)
             i += 1
 
         # Use >= to be sure to enter in this state
-        if z.size >= (x.size * (listening_for + 1) * conversion) and i >= listening_for * conversion:
+        if z.size >= (bufsize * (listening_for + 1) * conversion) and i >= listening_for * conversion:
             # Send to speech recognizer thread and reset 
             audio_queue.put(z)
             z = np.array([], np.int16)
@@ -110,9 +111,9 @@ class InputChunkProtocol(asyncio.Protocol):
         self.transport.resume_reading()
 
        
-# Serial communcation task
+# Serial communication task
 async def reader(): 
-    transport, protocol = await serial_asyncio_fast.create_serial_connection(loop, InputChunkProtocol, serial_port, baudrate=115200)
+    transport, protocol = await serial_asyncio_fast.create_serial_connection(loop, InputChunkProtocol, serial_port, baudrate)
 
     while not transport.is_closing() and event.is_set():
         await asyncio.sleep(0.01)   # Cooperative multitasking done right ;)
@@ -145,7 +146,7 @@ def recognize_worker():
                 elif all(x in voice for x in matches_off): publish.single(topic=shelly_id+"/command/switch:0", payload="off", qos=2)
 
 
-                
+
 # MQTT callbacks
 def on_connect(mqttc, obj, flags, reason_code, properties):
     print("reason_code: " + str(reason_code))
@@ -166,7 +167,7 @@ while True:
 
     try:
         event.set()
-        time.sleep(1)   # Give OS time to start other processes at startup
+        time.sleep(2)   # Give the OS time to start other services
         
         mqttc.on_message = on_message
         mqttc.on_connect = on_connect
@@ -195,7 +196,6 @@ while True:
         audio_queue = Queue()
         time.sleep(5)
     
-
     except KeyboardInterrupt:
 
         print("Exiting...")
@@ -207,7 +207,6 @@ while True:
         loop.close()
         break
 
-
     except serial.SerialException:
 
         audio_queue.put(None)
@@ -218,4 +217,5 @@ while True:
         loop.close()
         audio_queue = Queue()
         time.sleep(5)
+
 
