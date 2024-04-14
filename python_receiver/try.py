@@ -48,8 +48,8 @@ fsamp = 16000
 N = seconds_to_reset * conversion * bufsize     # == [seconds] of recording (almost)
 samp = False
 i = 0
-listening_for = 3   # * conversion == [second/bufsize]
-trigger_volume = 23000      # If the audio samples have magnitude greater than this start listening
+listening_for = 2   # * conversion == [second/bufsize]
+trigger_volume = 20000      # If the audio samples have magnitude greater than this start listening
 
 
 
@@ -143,9 +143,9 @@ def recognize_worker():
             if voice != '':
                 if all(x in voice for x in matches_on): publish.single(topic=shelly_id+"/command/switch:0", payload="on", qos=2)
                 elif all(x in voice for x in matches_off): publish.single(topic=shelly_id+"/command/switch:0", payload="off", qos=2)
-        
 
 
+                
 # MQTT callbacks
 def on_connect(mqttc, obj, flags, reason_code, properties):
     print("reason_code: " + str(reason_code))
