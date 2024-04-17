@@ -8,7 +8,7 @@ static const char channels = 1;
 static const int frequency = 16000;
 
 // Buffer to read samples into, each sample is 16-bits
-short sampleBuffer[256];
+short sampleBuffer[512];
 
 // Number of audio samples read
 volatile int samplesRead;
@@ -18,6 +18,7 @@ void onPDMdata();
 
 void setup() 
 {
+  // Baudrate need to be equal to receiver's one
   Serial.begin(115200);
 
   while (!Serial);
@@ -26,6 +27,7 @@ void setup()
   PDM.onReceive(onPDMdata);
   
   // Max possible gain and buffer size
+  PDM.setBufferSize(1024);
   PDM.setGain(80);
 
   // Initialize PDM with:
@@ -44,7 +46,7 @@ void loop()
   // Wait for samples to be read
   if (samplesRead) 
   {
-    // Print samples to the serial monitor or plotter
+    // Send 512 samples of 16 bit each (total 1024 bytes)
     Serial.write((uint8_t *)sampleBuffer, sizeof(sampleBuffer));
 
     // Clear the read count
