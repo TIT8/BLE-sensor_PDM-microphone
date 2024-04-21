@@ -168,7 +168,7 @@ void ble_loop()
     {
       led.write(1);
 
-      // check the humidity value every 300ms
+      // check the humidity value every 300ms (*)
       // while the central is connected:
       while (central.connected()) 
       {
@@ -184,9 +184,6 @@ void ble_loop()
       // when the central disconnects, turn off the LED:
       led.write(0);
     }
-
-    // Give control to main loop again
-    ThisThread::sleep_for(1ms);
   }
 }
 
@@ -202,3 +199,9 @@ void updateHumidityValue()
     old_hum = humidity;
   }
 }
+
+
+
+/*
+  (*) it depends on the actaul implementation of the RTOS
+*/
