@@ -203,5 +203,5 @@ void updateHumidityValue()
 
 
 /*
-  (*) it depends on the actaul implementation of the RTOS
+  (*) it depends on the actual RTOS implementation
 */
