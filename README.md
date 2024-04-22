@@ -14,7 +14,7 @@ _What better way to learn something new than with Arduino?_ 💪
 
 ## Mbed OS Structure
 
-**Two threads are employed: one for BLE and another for PDM**. The PDM thread is assigned the highest priority and exclusively utilizes the Serial, preventing access from the BLE thread (though this is unnecessary for proper operation).
+<ins>Two threads are employed: one for BLE and another for PDM</ins>. The PDM thread is assigned the highest priority and exclusively utilizes the Serial, preventing access from the BLE thread (though this is unnecessary for proper operation).
 
 I've opted to run the PDM task within the main loop provided by the Arduino framework (at `osPriorityNormal`), while the BLE task operates on a separate thread at `osPriorityBelowNormal`. Leveraging the [CMSIS-RTOS abstraction API](https://os.mbed.com/docs/mbed-os/v6.16/apis/thread.html) provided by Mbed enables priority configuration. Additionally, before the main loop restarts, control is yielded to the scheduler to ensure proper execution (the default RTOS tick frequency is 1kHz).
 
