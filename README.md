@@ -6,6 +6,10 @@ Here I'm using the [Notify](https://community.nxp.com/t5/Wireless-Connectivity-K
 
 _What's better than Arduino for learning something new?_ 💪
 
+## Speech recognition with Wit.AI
+
+Since Arduino Nano 33 BLE sense is built on [Mbed os](https://os.mbed.com/mbed-os/) and the [nrf52840](https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.nrf52832.ps.v1.1%2Fpdm.html) features an analog to digital frontend from a [microphone](https://docs.arduino.cc/tutorials/nano-33-ble-sense/microphone-sensor/) through a PDM-to-PCM chain to memory via DMA transfers, I used an RTOS thread to listen in background to the microphone and send audio samples to a Python receiver where the samples are processed.
+
 ### Requirements
 
 * [Arduino Nano 33 BLE Sense](https://docs.arduino.cc/hardware/nano-33-ble-sense/) or similar ([nRF52840](https://content.arduino.cc/assets/Nano_BLE_MCU-nRF52840_PS_v1.1.pdf)).
