@@ -34,8 +34,10 @@ A [Python script](https://github.com/TIT8/BLE-sensor_PDM-microphone/tree/master/
 
 Utilize [nRF Connect](https://www.nordicsemi.com/Products/Development-tools/nRF-Connect-for-mobile) on a smartphone, a [Python script](https://github.com/TIT8/BLE-sensor_PDM-microphone/tree/master/python_test_ble) on PC/MAC, or an [ESP32](https://github.com/TIT8/BLE_esp32) if available.
 
-<img src="https://github.com/TIT8/BLE/assets/68781644/963c1eb2-d931-46c0-95f1-b056321efaee" width="200" height="400">
-<img src="https://github.com/TIT8/BLE/assets/68781644/383c2047-a255-4287-9bcb-be2261b8eeb6" width="200" height="400">
+<img src="https://github.com/TIT8/BLE-sensor_PDM-microphone/assets/68781644/3d87bad1-526b-4154-853f-053570986b97" width="200" height="400">
+<img src="https://github.com/TIT8/BLE-sensor_PDM-microphone/assets/68781644/cea82b78-370a-49f6-8f3a-3a4cce8ff1a8" width="200" height="400">
+
+
 
 ### Goals 😎
 
