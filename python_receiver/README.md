@@ -10,6 +10,8 @@ Samples from the Arduino Nano 33 BLE Sense PDM microphone arrive at a sample rat
 
 Subsequently, we transmit the data to Wit.Ai, and the received string is utilized to search for matching keywords, determining the action to be taken with the bedroom light. The light is controlled through a Shelly Plus 1 relay connected to an MQTT broker on a Raspberry Pi 4, where the recognizer script also runs (via a scheduled worker in systemctl).
 
+Read the [code](https://github.com/TIT8/BLE-sensor_PDM-microphone/blob/master/python_receiver/recognizer.py) please.
+
 ## Required Packages
 
 Import the necessary packages into your Python environment. The packages used are:
