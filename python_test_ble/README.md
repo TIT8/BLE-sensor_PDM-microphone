@@ -26,5 +26,6 @@
 
 ## Final results
 
-![Screenshot (103)](https://github.com/TIT8/BLE/assets/68781644/9c092392-a292-470d-96a9-480da05d0238)
+![Screenshot (103)](https://github.com/TIT8/BLE-sensor_PDM-microphone/assets/68781644/6a875859-1662-45c1-b1b3-2e02983dfbe4)
+
 
