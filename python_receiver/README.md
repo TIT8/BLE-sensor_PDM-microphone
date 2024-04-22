@@ -240,4 +240,4 @@ Import the necessary packages into your Python environment. The packages used ar
 * [How to schedule a Python script on Linux](https://medium.com/codex/setup-a-python-script-as-a-service-through-systemctl-systemd-f0cc55a42267)
 * [How to list the serial ports using Python](https://stackoverflow.com/questions/12090503/listing-available-com-ports-with-python)
 * [Loop signal handlers](https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.loop.add_signal_handler)
-* [Previous project](https://github.com/TIT8/shelly_button_esp32_arduino/tree/master/speech_recognition)
+* [My previous project](https://github.com/TIT8/shelly_button_esp32_arduino/tree/master/speech_recognition)
