@@ -1,6 +1,6 @@
 ## Speech Recognition with Wit.AI :ear: + 	:microphone:
 
-Given that the Arduino Nano 33 BLE Sense is built on [Mbed OS](https://os.mbed.com/mbed-os/) and features an analog-to-digital frontend from a [microphone](https://docs.arduino.cc/tutorials/nano-33-ble-sense/microphone-sensor/) via a PDM-to-PCM chain to memory through DMA transfers, I've used an RTOS thread to capture microphone input and send audio samples to a Python receiver for processing.
+Given that the Arduino Nano 33 BLE Sense is built on [Mbed OS](https://os.mbed.com/mbed-os/) and features an analog-to-digital frontend from a [microphone](https://docs.arduino.cc/tutorials/nano-33-ble-sense/microphone-sensor/) via a PDM-to-PCM chain to memory through DMA transfers (see the [nrf52840](https://infocenter.nordicsemi.com/topic/ps_nrf52840/pdm.html?cp=5_0_0_5_14) documentation), I've used the default RTOS thread to capture microphone input and send audio samples to a Python receiver for processing.
 
 _All of this while also sending data to connected BLE devices (using another RTOS thread)._ :rocket:
 
