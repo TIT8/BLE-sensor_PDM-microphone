@@ -43,4 +43,4 @@ Utilize [nRF Connect](https://www.nordicsemi.com/Products/Development-tools/nRF-
 
 * Direct use of the [official nRF SDK](https://www.nordicsemi.com/Products/Development-software/nRF-Connect-SDK).
 * Attempting to replicate functionality on ESP32 via ESP-IDF BLE library. &nbsp; [[DONE ✔️]](https://github.com/TIT8/BLE_esp32)
-* Offline speech recognition via a pre-trained machine learning model using TinyML and Tensorflow. &nbsp; [[STARTED :construction_worker:]](https://github.com/TIT8/shelly_button_esp32_arduino/tree/master/speech_recognition)
+* Offline speech recognition via a pre-trained machine learning model using Tensorflow (TinyML). &nbsp; [[STARTED :construction_worker:]](https://github.com/TIT8/shelly_button_esp32_arduino/tree/master/speech_recognition)
