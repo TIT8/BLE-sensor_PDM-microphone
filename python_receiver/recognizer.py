@@ -60,7 +60,7 @@ async def receiver(loop, serial_port_ACM):
     samp = False
     i = 0
     listening_for = 1.5   # * conversion == [second/bufsize]
-    trigger_volume = 17000  # If the audio samples have magnitude greater than this start listening
+    trigger_volume = 15000  # If the audio samples have magnitude greater than this start listening
 
     
     try:
@@ -143,6 +143,7 @@ def recognize_worker():
     matches_on = ["cendi", "luc"]
     matches_off = ["egni", "luc"]
     
+    print("Starting recognizer worker")
     
     while True:
         audio_sample = audio_queue.get()
@@ -166,7 +167,8 @@ def recognize_worker():
                 if all(x in voice for x in matches_on): publish.single(topic=shelly_id+"/command/switch:0", payload="on", qos=2)
                 elif all(x in voice for x in matches_off): publish.single(topic=shelly_id+"/command/switch:0", payload="off", qos=2)
     
-    
+    print("Exiting recognizer worker")
+
 
 
 '''
@@ -319,3 +321,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    print("Service stopped")    # If read on the systemctl status log mean "the script stopped gracefully"
