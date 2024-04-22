@@ -6,7 +6,7 @@ To comprehend the functionality of the PDM microphone and evaluate the quality o
 
 ## The Recognizer Script :monocle_face:
 
-Samples from the Arduino Nano 33 BLE Sense PDM microphone arrive at a sample rate of 16 kHz and are 16 bits per sample. The PDM code fills a buffer of 512 samples, each 16 bits. This buffer is then passed to `Serial.write()`, which writes 1024 bytes and proceeds to refill the same buffer for the next burst. Therefore, to record for the desired duration, we read 'fsamp' * 'seconds' transactions and store them in the numpy buffer. Essentially, we read 1024 bytes each time and convert them into a numpy array of 512 items with a size of `numpy.int16`. Hence, it's more convenient to think in terms of bytes to approximate the listening duration.
+Samples from the Arduino Nano 33 BLE Sense PDM microphone arrive at a sample rate of 16 kHz and are 16 bits per sample. The PDM code fills a buffer of 512 samples, each 16 bits. This buffer is then passed to `Serial.write()`, which writes 1024 bytes and proceeds to refill the same buffer for the next burst. Therefore, to record for the desired duration, we read 'fsamp' * 'seconds' transactions and store them in the numpy buffer. Essentially, we read 1024 bytes each time and convert them into a Numpy array of 512 items with a size of `numpy.int16`. Hence, it's more convenient to think in terms of bytes to approximate the listening duration.
 
 ```python3
 # Serial COMM
