@@ -172,7 +172,7 @@ def recognize_worker():
 
 
 '''
-    Find serial port where PDM MIC is attached
+    Find serial port where PDM MIC is attached (look here for alternative https://github.com/pyserial/pyserial/pull/658/files)
 '''
 def serial_ports():
     # Lists serial port names
