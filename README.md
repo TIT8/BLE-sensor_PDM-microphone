@@ -22,6 +22,8 @@ Internally, the PDM library employs a circular buffer, which is repeatedly copie
 
 A [Python script](https://github.com/TIT8/BLE-sensor_PDM-microphone/tree/master/python_receiver) is employed to receive and process the samples, generating an audio file, interfacing with [***Wit.AI***](https://wit.ai/), and controlling the bedroom light as demonstrated in a [previous project](https://github.com/TIT8/shelly_esp32_button_espidf) upon detection of specific keywords. 
 
+[Here](https://dumblebots.com/2020/04/06/programming-with-mbed-on-arduino/) you can find my starting reference for using Mbed OS with Arduino.
+
 ### Requirements
 
 * [Arduino Nano 33 BLE Sense](https://docs.arduino.cc/hardware/nano-33-ble-sense/) or similar ([nRF52840](https://content.arduino.cc/assets/Nano_BLE_MCU-nRF52840_PS_v1.1.pdf)).
