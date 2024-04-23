@@ -123,7 +123,8 @@ while True:
                 elif all(x in voice for x in matches_off): publish.single(topic=shelly_id+"/command/switch:0", payload="off", qos=2)
 ```
 
-❗ The script is capable of searching for an Arduino device attached to the serial port and will automatically establish a connection to it, managing any eventual disconnection on its own. <ins>You won't need to make any changes</ins>. Obviously, there are multiple methods to detect serial ports. The most straightforward one is outlined in [this pull request](https://github.com/pyserial/pyserial/pull/658/files). However, here I also aim to detect whether the port is open, raising a serial.SerialException otherwise.
+❗ The script is capable of searching for an Arduino device attached to the serial port and will automatically establish a connection to it, managing any eventual disconnection on its own. <ins>You won't need to make any changes</ins>.   
+Obviously, there are multiple methods to detect serial ports. The most straightforward one is outlined in [this pull request](https://github.com/pyserial/pyserial/pull/658/files). However, here I also aim to detect whether the port is open, raising a serial.SerialException otherwise.
 
 ```python3
 '''
