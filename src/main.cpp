@@ -188,6 +188,7 @@ void ble_loop()
 }
 
 
+// Maybe it's better to defer this via an Event Queue? (https://os.mbed.com/docs/mbed-os/v6.16/apis/eventqueue.html)
 void updateHumidityValue()
 {
   float humidity = HTS.readHumidity();
