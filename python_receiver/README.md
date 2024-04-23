@@ -2,7 +2,14 @@
 
 To comprehend the functionality of the PDM microphone and evaluate the quality of the captured audio, you can utilize the [pdm_serial.py](https://github.com/TIT8/BLE-sensor_PDM-microphone/blob/master/python_receiver/pdm_serial.py) script to listen for a few seconds and save the results in a `wav` file. In the repo there is an example recording named _microphone-results.wav_.
 
-❗ Ensure that you have `scipy` and `numpy` installed and configured the [required serial port](https://github.com/TIT8/BLE-sensor_PDM-microphone/blob/390e56321a8d2af8cab012b177ed7ffe3d0852b2/python_receiver/pdm_serial.py#L21) in the script.
+❗ Ensure that you have `scipy`, `numpy` and `pyserial` installed and configured the [required serial port](https://github.com/TIT8/BLE-sensor_PDM-microphone/blob/390e56321a8d2af8cab012b177ed7ffe3d0852b2/python_receiver/pdm_serial.py#L21) in the script. If you don't know what the port name is, try the code below in the Python console:
+
+```python3
+from serial.tools.list_ports import comports
+
+for port in comports():
+        print(port)
+```
 
 ## The Recognizer Script :monocle_face:
 
