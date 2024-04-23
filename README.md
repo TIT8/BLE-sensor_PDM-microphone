@@ -1,6 +1,6 @@
 ## Speech Recognition with Wit.AI :ear: + 	:microphone:
 
-Given that the Arduino Nano 33 BLE Sense is built on [Mbed OS](https://os.mbed.com/mbed-os/) and features an analog-to-digital frontend from a [microphone](https://docs.arduino.cc/tutorials/nano-33-ble-sense/microphone-sensor/) via a PDM-to-PCM chain to memory through DMA transfers (see the [nrf52840](https://infocenter.nordicsemi.com/topic/ps_nrf52840/pdm.html?cp=5_0_0_5_14) documentation), I've used the default RTOS thread to capture microphone input and send audio samples to a Python receiver for processing.
+Given that the Arduino Nano 33 BLE Sense is built on [Mbed OS](https://os.mbed.com/mbed-os/) and features an analog-to-digital frontend from a [microphone](https://docs.arduino.cc/tutorials/nano-33-ble-sense/microphone-sensor/) via a PDM-to-PCM chain to memory through DMA transfers (see the [nrf52840](https://infocenter.nordicsemi.com/topic/ps_nrf52840/pdm.html?cp=5_0_0_5_14) documentation), I've used the default RTOS thread to capture microphone input and send audio samples to a Python receiver for processing. The [receiver](https://github.com/TIT8/BLE-sensor_PDM-microphone/tree/master/python_receiver) will respond to voice commands by controlling the light in my bedroom, turning it on and off accordingly.
 
 _All of this while also sending data to connected BLE devices (using another RTOS thread)._ :rocket:
 
@@ -43,6 +43,13 @@ Utilize [nRF Connect](https://www.nordicsemi.com/Products/Development-tools/nRF-
 <img src="https://github.com/TIT8/BLE-sensor_PDM-microphone/assets/68781644/3d87bad1-526b-4154-853f-053570986b97" width="200" height="400">
 <img src="https://github.com/TIT8/BLE-sensor_PDM-microphone/assets/68781644/cea82b78-370a-49f6-8f3a-3a4cce8ff1a8" width="200" height="400">
 
+## Pros and cons of speech recognition task
+
+This approach is functioning very well: collecting audio samples, sending them to a serial device that manages the connection with the Wit.Ai API and takes action based on the transcribed text. The Wit.Ai AI performs incredibly well, being trained by Meta, so it's very reliable. However, latency is the primary issue; for instance, when I say "accendi luce," it takes 1-2 seconds before the light turns on (though without errors, it does always turn on! :mechanical_arm:).
+
+If you desire low latency and quick responses to voice input, you need to move the inference/transcribing part onto the device, either the host of the serial connection or the Arduino Nano 33 BLE Sense. I've achieved success with an [example](https://github.com/TIT8/shelly_button_esp32_arduino/tree/master/speech_recognition) thanks to [Edge Impulse](https://edgeimpulse.com/) for rapid prototyping. However, upon reviewing [their documentation](https://docs.edgeimpulse.com/docs/tutorials/advanced-inferencing/continuous-audio-sampling) and the generated code, I realize I can learn more (and perhaps borrow :zany_face:) about offline voice recognition. This is a completely different approach, offering more privacy and faster responses, but achieving reliability requires a significant amount of time to train the model for inference, and the results are slightly inferior to "Wit.Ai + Python."
+
+So, life is full of trade-offs. Fortunately, we're fortunate to have more than one solution :lying_face:.
 
 
 ### Goals 😎
