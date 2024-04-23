@@ -22,7 +22,9 @@ Internally, the PDM library employs a circular buffer, which is repeatedly copie
 
 A [Python script](https://github.com/TIT8/BLE-sensor_PDM-microphone/tree/master/python_receiver) is employed to receive and process the samples, generating an audio file, interfacing with [***Wit.AI***](https://wit.ai/), and controlling the bedroom light as demonstrated in a [previous project](https://github.com/TIT8/shelly_esp32_button_espidf) upon detection of specific keywords. 
 
-[Here](https://dumblebots.com/2020/04/06/programming-with-mbed-on-arduino/) you can find my starting reference for using Mbed OS with Arduino.
+## References
+
+[Here](https://dumblebots.com/2020/04/06/programming-with-mbed-on-arduino/), you can find my initial reference for using Mbed OS with Arduino, and [here](https://forums.mbed.com/t/audio-input-isnt-working-correctly/23024) is the forum where you can ask questions (this link will actually take you to an issue that I found interesting to illustrate the simplicity of Mbed OS).
 
 ### Requirements
 
@@ -44,6 +46,6 @@ Utilize [nRF Connect](https://www.nordicsemi.com/Products/Development-tools/nRF-
 ### Goals 😎
 
 * Direct use of the [official nRF SDK](https://www.nordicsemi.com/Products/Development-software/nRF-Connect-SDK).
-* Learn more about Mbed OS (coming from FreeRTOS, I'm flabbergasted by how good it is, take a look to [this issue](https://forums.mbed.com/t/audio-input-isnt-working-correctly/23024) to see how it's simple to get started with a project not so simple) ❤️
+* Learn more about Mbed OS (coming from FreeRTOS, I'm flabbergasted by how good it is) ❤️
 * Attempting to replicate functionality on ESP32 via ESP-IDF BLE library. &nbsp; [[DONE ✔️]](https://github.com/TIT8/BLE_esp32)
 * Offline speech recognition via a pre-trained machine learning model using Tensorflow (TinyML). &nbsp; [[STARTED :construction_worker:]](https://github.com/TIT8/shelly_button_esp32_arduino/tree/master/speech_recognition)
