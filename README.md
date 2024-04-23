@@ -26,6 +26,8 @@ A [Python script](https://github.com/TIT8/BLE-sensor_PDM-microphone/tree/master/
 
 [Here](https://dumblebots.com/2020/04/06/programming-with-mbed-on-arduino/), you can find my initial reference for using Mbed OS with Arduino, and [here](https://forums.mbed.com/t/audio-input-isnt-working-correctly/23024) is the forum where you can ask questions (this link will actually take you to an issue that I found interesting to illustrate the simplicity of Mbed OS).
 
+If you don't know what an operating system does, [this video](https://www.youtube.com/watch?v=TEq3-p0GWGI) is for you.
+
 ### Requirements
 
 * [Arduino Nano 33 BLE Sense](https://docs.arduino.cc/hardware/nano-33-ble-sense/) or similar ([nRF52840](https://content.arduino.cc/assets/Nano_BLE_MCU-nRF52840_PS_v1.1.pdf)).
@@ -48,4 +50,4 @@ Utilize [nRF Connect](https://www.nordicsemi.com/Products/Development-tools/nRF-
 * Direct use of the [official nRF SDK](https://www.nordicsemi.com/Products/Development-software/nRF-Connect-SDK).
 * Learn more about Mbed OS (coming from FreeRTOS, I'm flabbergasted by how good it is) ❤️
 * Attempting to replicate functionality on ESP32 via ESP-IDF BLE library. &nbsp; [[DONE ✔️]](https://github.com/TIT8/BLE_esp32)
-* Offline speech recognition via a pre-trained machine learning model using Tensorflow (TinyML). &nbsp; [[STARTED :construction_worker:]](https://github.com/TIT8/shelly_button_esp32_arduino/tree/master/speech_recognition)
+* ***Offline speech recognition via a pre-trained machine learning model using Tensorflow (TinyML).*** &nbsp; [[STARTED :construction_worker:]](https://github.com/TIT8/shelly_button_esp32_arduino/tree/master/speech_recognition)
