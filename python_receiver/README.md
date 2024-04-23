@@ -230,7 +230,9 @@ def ask_exit():
 
 If you use the script on Windows, using `read(1024)` or `readexactly(1024)` methods of the reader coming from `open_serial_connection` won't make any difference because the PySerial Asyncio library on Windows is based on [busy polling](https://github.com/home-assistant-libs/pyserial-asyncio-fast/blob/c3153083a5fb734f4361215ce404a2421b2664b7/serial_asyncio_fast/__init__.py#L324) (the loop calls the OS every 5ms to read samples until 1024 bytes, which is the [default limit](https://github.com/home-assistant-libs/pyserial-asyncio-fast/blob/c3153083a5fb734f4361215ce404a2421b2664b7/serial_asyncio_fast/__init__.py#L70) of the library).
 
-While on Linux, it is important. Asyncio will return immediately when looking at the file descriptor, and it is not guaranteed with the `read()` method to obtain enough samples. <ins> Yes, `read(1024)` in this way can provide low latency, but then the signal processing part of the code is prone to bugs </ins> (you can fix it using the `x.size` variable instead of `bufsize`, but still, it isn't the best solution).
+While on Linux, it is important. Asyncio will return immediately when looking at the file descriptor, and it is not guaranteed with the `read()` method to obtain enough samples. <ins> Yes, `read(1024)` in this way can provide low latency, but then the signal processing part of the code is prone to bugs </ins> (you can fix it using the `x.size` variable instead of `bufsize`, but still, it isn't the best solution). 
+
+:lizard: If you want something low latency you have to move the speech recognition from online to offline on device, like I did [here](https://github.com/TIT8/shelly_button_esp32_arduino/tree/master/speech_recognition).
 
 ## Required Packages
 
