@@ -18,6 +18,7 @@ This script take the Arduino-Nano-33-BLE-sense-PDM-mic data in and save them on 
 
 
 # Serial Config
+# If you don't know the name of your port, try this code in the Python console (https://github.com/pyserial/pyserial/pull/658/files)
 ser = serial.Serial(port='<COM or /dev/tty>',baudrate=115200,bytesize=8,timeout=.1)
 ser.reset_input_buffer()
 ser.reset_output_buffer()
