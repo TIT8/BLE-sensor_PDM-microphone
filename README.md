@@ -49,7 +49,7 @@ Utilize [nRF Connect](https://www.nordicsemi.com/Products/Development-tools/nRF-
 
 ➖ However, latency is the primary issue; for instance, when I say "accendi luce," it takes 1-2 seconds before the light turns on (though without errors, it does always turn on! :mechanical_arm:).
 
-➖ Data privacy is a concern; hence, the Python receiver I developed sends data to the Wit.Ai API only when the captured audio reaches a sufficiently high volume (as intended, I'm talking to the Arduino with a certain level which I don't use with my brother in the room normally), rather than through continuous streaming.
+➖ Data privacy is a concern; hence, <ins>the Python receiver I developed sends data to the Wit.Ai API only when the captured audio reaches a sufficiently high volume</ins> (as intended, I'm talking to the Arduino with a certain level which I don't use with my brother in the room normally), rather than through continuous streaming.
 
 The two minus can be improved in two way.
 
