@@ -31,7 +31,7 @@ N = seconds_to_reset * conversion * bufsize     # == [seconds] of recording (alm
 samp = False
 i = 0
 listening_for = 1.5   # * conversion == [second/bufsize]
-trigger_volume = 16000  # If the audio samples have magnitude greater than this start listening
+trigger_volume = 17000  # If the audio samples have magnitude greater than this start listening
 ```
 
 We use Asyncio [`StreamReader`](https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamReader) and [`StreamWriter`](https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamWriter) as interfaces with the serial port. The try and except block will handle problems with the connection. Please read the [source code](https://github.com/home-assistant-libs/pyserial-asyncio-fast/blob/c3153083a5fb734f4361215ce404a2421b2664b7/serial_asyncio_fast/__init__.py#L560) of the `serial_asyncio_fast.open_serial_connection()` coroutine.
