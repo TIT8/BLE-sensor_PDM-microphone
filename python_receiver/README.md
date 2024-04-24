@@ -34,7 +34,7 @@ listening_for = 1.5   # * conversion == [second/bufsize]
 trigger_volume = 17000  # If the audio samples have magnitude greater than this start listening
 ```
 
-This runs in an Asyncio executor in the background. We use Asyncio StreamReader and StreamWriter as interfaces with the serial port. The try and except block will handle problems with the connection.
+We use Asyncio [`StreamReader`](https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamReader) and [`StreamWriter`](https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamWriter) as interfaces with the serial port. The try and except block will handle problems with the connection. Please read the [source code](https://github.com/home-assistant-libs/pyserial-asyncio-fast/blob/c3153083a5fb734f4361215ce404a2421b2664b7/serial_asyncio_fast/__init__.py#L560) of the `serial_asyncio_fast.open_serial_connection()` coroutine.
 
 ```python3
 try:
@@ -46,7 +46,7 @@ except:
     event.clear()
 ```
 
-If a connection is established, we begin to receive data, handling any eventual timeouts.
+If a connection is established, we begin to receive data, handling any eventual timeouts. 
 
 ```python3
 while event.is_set() and not stop.is_set():
@@ -58,6 +58,102 @@ while event.is_set() and not stop.is_set():
     except:
         break
 ```
+
+**But wait, the `pyserial` package doesn't have a `readexactly()` method!**  
+Yes, this method is called on the `StreamReader` instance, which is passed to the [`create_serial_connection`](https://github.com/home-assistant-libs/pyserial-asyncio-fast/blob/c3153083a5fb734f4361215ce404a2421b2664b7/serial_asyncio_fast/__init__.py#L474) coroutine through a [`StreamReaderProtocol`](https://github.com/python/cpython/blob/692e902c742f577f9fc8ed81e60ed9dd6c994e1e/Lib/asyncio/streams.py#L180). Every time data is received, the loop will call the `data_received()` method of the `StreamReaderProtocol`, which passes data to the `StreamReader` instance. The `StreamReader` instance checks if the exact bytes are received, and if so, it returns to the awaiter (our reader).
+
+```python3
+class StreamReaderProtocol(FlowControlMixin, protocols.Protocol):
+        """Helper class to adapt between Protocol and StreamReader.
+        
+        (This is a helper class instead of making StreamReader itself a
+        Protocol subclass, because the StreamReader has other potential
+        uses, and to prevent the user of the StreamReader to accidentally
+        call inappropriate methods of the protocol.)
+        """
+
+        def __init__(...):
+                ...
+
+        def data_received(self, data):
+                reader = self._stream_reader
+                if reader is not None:
+                    reader.feed_data(data)        # reader is an asyncio.StreamReader instance
+```
+
+So, looking at the Python source code, the protocol calls the `feed_data()` method, which fills the read buffer. Then, the `readexactly()` coroutine (via cooperative multitasking with other looped coroutines) will return the correct number of bytes to the waiter, if possible.
+
+```python3
+class StreamReader:
+
+        def __init__(...):
+                ...
+
+        def feed_data(self, data):
+                assert not self._eof, 'feed_data after feed_eof'
+        
+                if not data:
+                    return
+        
+                self._buffer.extend(data)
+                self._wakeup_waiter()
+        
+                if (self._transport is not None and
+                        not self._paused and
+                        len(self._buffer) > 2 * self._limit):
+                    try:
+                        self._transport.pause_reading()
+                    except NotImplementedError:
+                        # The transport can't be paused.
+                        # We'll just have to buffer all data.
+                        # Forget the transport so we don't keep trying.
+                        self._transport = None
+                    else:
+                        self._paused = True
+
+        async def readexactly(self, n):
+                """Read exactly `n` bytes.
+        
+                Raise an IncompleteReadError if EOF is reached before `n` bytes can be
+                read. The IncompleteReadError.partial attribute of the exception will
+                contain the partial read bytes.
+        
+                if n is zero, return empty bytes object.
+        
+                Returned value is not limited with limit, configured at stream
+                creation.
+        
+                If stream was paused, this function will automatically resume it if
+                needed.
+                """
+                if n < 0:
+                    raise ValueError('readexactly size can not be less than zero')
+        
+                if self._exception is not None:
+                    raise self._exception
+        
+                if n == 0:
+                    return b''
+        
+                while len(self._buffer) < n:
+                    if self._eof:
+                        incomplete = bytes(self._buffer)
+                        self._buffer.clear()
+                        raise exceptions.IncompleteReadError(incomplete, n)
+        
+                    await self._wait_for_data('readexactly')
+        
+                if len(self._buffer) == n:
+                    data = bytes(self._buffer)
+                    self._buffer.clear()
+                else:
+                    data = bytes(memoryview(self._buffer)[:n])
+                    del self._buffer[:n]
+                self._maybe_resume_transport()
+                return data
+```
+
+So to learn more, check the [Python source code](https://github.com/python/cpython/blob/main/Lib/asyncio/streams.py) and at [the official doc](https://docs.python.org/3/library/asyncio-protocol.html#streaming-protocols) to see how the state machine is used under the hood.
 
 Once 1024 bytes are received, we must process the data, so NumPy comes into play, transforming the data read into a buffer of 512 samples of 16 bits each. We save incoming samples in the `y` buffer; this way, we collect the history of the sampled audio.
 
