@@ -60,7 +60,7 @@ async def receiver(loop, serial_port_ACM):
     samp = False
     i = 0
     listening_for = 1.5   # * conversion == [second/bufsize]
-    trigger_volume = 16000  # If the audio samples have magnitude greater than this start listening
+    trigger_volume = 17000  # If the audio samples have magnitude greater than this start listening
 
     
     try:
