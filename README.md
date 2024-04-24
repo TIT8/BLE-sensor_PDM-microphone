@@ -45,9 +45,17 @@ Utilize [nRF Connect](https://www.nordicsemi.com/Products/Development-tools/nRF-
 
 ## Pros and cons of speech recognition task
 
-This approach is functioning very well: collecting audio samples, sending them to a serial device that manages the connection with the Wit.Ai API and takes action based on the transcribed text. The Wit.Ai AI performs incredibly well, being trained by Meta, so it's very reliable. However, latency is the primary issue; for instance, when I say "accendi luce," it takes 1-2 seconds before the light turns on (though without errors, it does always turn on! :mechanical_arm:).
+➕ This approach is functioning very well: collecting audio samples, sending them to a serial device that manages the connection with the Wit.Ai API and takes action based on the transcribed text. The Wit.Ai AI performs incredibly well, being trained by Meta, so it's very reliable. 
 
-If you desire low latency and quick responses to voice input, you need to move the inference/transcribing part onto the device, either the host of the serial connection or the Arduino Nano 33 BLE Sense. I've achieved success with an [example](https://github.com/TIT8/shelly_button_esp32_arduino/tree/master/speech_recognition) thanks to [Edge Impulse](https://edgeimpulse.com/) for rapid prototyping. However, upon reviewing [their documentation](https://docs.edgeimpulse.com/docs/tutorials/advanced-inferencing/continuous-audio-sampling) and the generated code, I realize I can learn more (and perhaps borrow :zany_face:) about offline voice recognition. This is a completely different approach, offering more privacy and faster responses, but achieving reliability requires a significant amount of time to train the model for inference, and the results are slightly inferior to "Wit.Ai + Python."
+➖ However, latency is the primary issue; for instance, when I say "accendi luce," it takes 1-2 seconds before the light turns on (though without errors, it does always turn on! :mechanical_arm:).
+
+➖ Data privacy is a concern; hence, the Python receiver I developed sends data to the Wit.Ai API only when the captured audio reaches a sufficiently high volume (as intended, I'm talking to the Arduino with a certain level which I don't use with my brother in the room normally), rather than through continuous streaming.
+
+The two minus can be improved in two way.
+
+1) If you desire low latency and quick responses to voice input, you need to move the inference/transcribing part onto the device, either the host of the serial connection or the Arduino Nano 33 BLE Sense. I've achieved success with an [example](https://github.com/TIT8/shelly_button_esp32_arduino/tree/master/speech_recognition) thanks to [Edge Impulse](https://edgeimpulse.com/) for rapid prototyping. However, upon reviewing [their documentation](https://docs.edgeimpulse.com/docs/tutorials/advanced-inferencing/continuous-audio-sampling) and the generated code, I realize I can learn more (and perhaps borrow :zany_face:) about offline voice recognition. This is a completely different approach, offering more privacy and faster responses, but achieving reliability requires a significant amount of time to train the model for inference, and the results are slightly inferior to "Wit.Ai + Python."
+
+2) An intermediate solution could be to maintain the speech recognition on external hardware instead of the nRF52840, utilizing an offline speech recognition engine such as [PocketSphinx](https://pocketsphinx.readthedocs.io/en/latest/) (which has been tried and proven to work, but **only in English**) or [Vosk](https://github.com/alphacep/vosk-api) (although it's a bit tricky to get started with, this [demo](https://github.com/anuran-roy/vosk-demo) can be helpful, though it hasn't proven entirely reliable in my tests).
 
 So, life is full of trade-offs. Fortunately, we're fortunate to have more than one solution :lying_face:.
 
