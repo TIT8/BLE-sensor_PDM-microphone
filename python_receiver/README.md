@@ -153,7 +153,7 @@ class StreamReader:
                 return data
 ```
 
-So to learn more, check the [Python source code](https://github.com/python/cpython/blob/main/Lib/asyncio/streams.py) and at [the official doc](https://docs.python.org/3/library/asyncio-protocol.html#streaming-protocols) to see how the state machine is used under the hood.
+So to learn more, check the [Python source code](https://github.com/python/cpython/blob/main/Lib/asyncio/streams.py) and [the official doc](https://docs.python.org/3/library/asyncio-protocol.html#streaming-protocols) to see how the state machine is used under the hood.
 
 Once 1024 bytes are received, we must process the data, so NumPy comes into play, transforming the data read into a buffer of 512 samples of 16 bits each. We save incoming samples in the `y` buffer; this way, we collect the history of the sampled audio.
 
