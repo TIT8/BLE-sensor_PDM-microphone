@@ -57,7 +57,7 @@ The two minus can be improved in two way.
 
 2) An intermediate solution could be to maintain the speech recognition on external hardware instead of the nRF52840, utilizing an offline speech recognition engine such as [PocketSphinx](https://pocketsphinx.readthedocs.io/en/latest/) (tested and not working because I'm using 16 bit samples, the library uses only 8 bit) or [Vosk](https://github.com/alphacep/vosk-api) (although it's a bit tricky to get started with, this [demo](https://github.com/anuran-roy/vosk-demo) can be helpful, **though it hasn't proven entirely reliable in my tests**). But I think that transcriptor as good as Wit.Ai are difficult to find for this application.
 
-So, life is full of trade-offs. Fortunately, we're fortunate to have more than one solution :lying_face:.
+So, life is full of trade-offs. We're lucky to have more than one solution :lying_face:.
 
 
 ### Goals 😎
