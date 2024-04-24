@@ -60,7 +60,7 @@ async def receiver(loop, serial_port_ACM):
     samp = False
     i = 0
     listening_for = 1.5   # * conversion == [second/bufsize]
-    trigger_volume = 15000  # If the audio samples have magnitude greater than this start listening
+    trigger_volume = 16000  # If the audio samples have magnitude greater than this start listening
 
     
     try:
@@ -74,11 +74,12 @@ async def receiver(loop, serial_port_ACM):
 
     while event.is_set() and not stop.is_set():
     
-        deadline = loop.time() + 1
+        deadline = loop.time() + 2    # Timeout of two seconds
         try:
             async with asyncio.timeout_at(deadline):
                 data = await reader.readexactly(bufsize * 2)    # In order to read 512 samples of 16 bit each, I need 1024 bytes
         except:
+            print("Maybe a timeout, closing...")
             break
 
         # Data in input is buffered as 16bit, so 1024 bytes are coming at burst
