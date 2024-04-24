@@ -45,7 +45,7 @@ Utilize [nRF Connect](https://www.nordicsemi.com/Products/Development-tools/nRF-
 
 ## Pros and cons of speech recognition task
 
-➕ This approach is working very well: collecting audio samples, sending them to a serial device that manages the connection with the Wit.Ai API and takes action based on the transcribed text. The Wit.Ai AI performs incredibly well, being trained by Meta, so it's very reliable. 
+➕ This approach is working very well: collecting audio samples, sending them to a serial device that manages the connection with the Wit.Ai API and takes action based on the transcribed text. The Wit.Ai AI performs incredibly well, being trained by Meta and **you could also train it to better recognize your keywords**. So it's very reliable. 
 
 ➖ However, latency is the primary issue; for instance, when I say "accendi luce," it takes 1-2 seconds before the light turns on (though without errors, it does always turn on! :mechanical_arm:).
 
@@ -55,7 +55,7 @@ The two minus can be improved in two ways: if you desire low latency and quick r
 
 1)  The best alternative I've achieved with success is hosted on [Github](https://github.com/TIT8/shelly_button_esp32_arduino/tree/master/speech_recognition), thanks to [Edge Impulse](https://edgeimpulse.com/) for rapid prototyping. However, upon reviewing [their documentation](https://docs.edgeimpulse.com/docs/tutorials/advanced-inferencing/continuous-audio-sampling) and the generated code, I realize I can learn more (and perhaps borrow :zany_face:) about offline voice recognition. This is a completely different approach, offering more privacy and faster responses, but achieving reliability requires a significant amount of time to train the model for inference, and the results are slightly inferior to "Wit.Ai + Python."
 
-2) An intermediate solution could be to maintain the speech recognition on external hardware instead of the nRF52840, utilizing an offline speech recognition engine such as [PocketSphinx](https://pocketsphinx.readthedocs.io/en/latest/) (tested and not working, I'm still a beginner) or [Vosk](https://github.com/alphacep/vosk-api) (although it's a bit tricky to get started with, this [demo](https://github.com/anuran-roy/vosk-demo) can be helpful, **though it hasn't proven entirely reliable in my tests**). But I think that transcriptor as good as Wit.Ai are difficult to find for this application.
+2) An intermediate solution could be to maintain the speech recognition on external hardware instead of the nRF52840, utilizing an offline speech recognition engine such as [PocketSphinx](https://pocketsphinx.readthedocs.io/en/latest/) (tested and not working, I'm still a beginner) or [Vosk](https://github.com/alphacep/vosk-api) (although it's a bit tricky to get started with, this [demo](https://github.com/anuran-roy/vosk-demo) can be helpful, **though it hasn't proven entirely reliable in my tests**). But I think that transcriptor as good as Wit.Ai are difficult to find for this application, at least for the italian language.
 
 So, life is full of trade-offs. We're lucky to have more than one solution :lying_face:.
 
