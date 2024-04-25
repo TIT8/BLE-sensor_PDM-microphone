@@ -45,7 +45,7 @@ Utilize [nRF Connect](https://www.nordicsemi.com/Products/Development-tools/nRF-
 
 ## Pros and cons of speech recognition task
 
-➕ This approach is working very well: collecting audio samples, sending them to a serial device that manages the connection with the Wit.Ai API and takes action based on the transcribed text. The Wit.Ai AI performs incredibly well, being trained by Meta and **you could also train it to better recognize your keywords**. So it's very reliable. 
+➕ This approach is working very well: collecting audio samples, sending them to a serial device that manages the connection with the Wit.Ai API and takes action based on the transcribed text. The Wit.Ai AI performs incredibly well, being trained by Meta, and **you could also train it to better recognize your keywords**. So it's very reliable. 
 
 ➖ However, latency is the primary issue; for instance, when I say "accendi luce," it takes 1-2 seconds before the light turns on (though without errors, it does always turn on! :mechanical_arm:).
 
