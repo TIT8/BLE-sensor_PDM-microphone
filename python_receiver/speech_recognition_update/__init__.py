@@ -799,32 +799,40 @@ class Recognizer(AudioSource):
             assert isinstance(key, str), "``key`` must be a string"           
             assert isinstance(api, str), "``api`` must be a string"
         
+    
             wav_data = audio_data.get_wav_data(
                 convert_rate=None if audio_data.sample_rate >= 8000 else 8000,  # audio samples must be at least 8 kHz
                 convert_width=2  # audio samples should be 16-bit
             )
             
             url = "https://api.wit.ai/" + api
+            '''
             #request = Request(url, data=wav_data, headers={"Authorization": "Bearer {}".format(key), "Content-Type": "audio/wav"})
             try:
-                response = urllib3.request("POST", url=url, body=wav_data, headers={"Authorization": "Bearer {}".format(key), "Content-Type": "audio/wav"})
-                #response = urlopen(request, timeout=self.operation_timeout)
+                response = urlopen(request, timeout=self.operation_timeout)
             except HTTPError as e:
                 raise RequestError("recognition request failed: {}".format(e.reason))
             except URLError as e:
                 raise RequestError("recognition connection failed: {}".format(e.reason))
                 
-            #response_text = response.read().decode("utf-8")
-            #concat_json = re.sub("\n}\r\n{\n", "\n},\n{\n", response_text)
-            #concat_json_str = f"[{concat_json}]"
-            #results = json.loads(concat_json_str)
+            response_text = response.read().decode("utf-8")
+            concat_json = re.sub("\n}\r\n{\n", "\n},\n{\n", response_text)
+            concat_json_str = f"[{concat_json}]"
+            results = json.loads(concat_json_str)
+            '''
 
+            try: 
+                response = urllib3.request("POST", url=url, body=wav_data, headers={"Authorization": "Bearer {}".format(key), "Content-Type": "audio/wav"})
+            except:
+                raise RequestError("recognition request failed")
+            
             d = re.sub("\n}\r\n{\n", "\n},\n{\n", response.data.decode())
             results = json.loads(f"[{d}]")
             
             # return results
             if show_all: return results
             for result in results:
+                if "code" in result and result["code"] == "bad-request": raise RequestError("recognition request failed")
                 if result["type"] == "FINAL_TRANSCRIPTION":
                     if "text" not in result or result["text"] is None or result["text"] == '': raise UnknownValueError()
                     return result["text"]

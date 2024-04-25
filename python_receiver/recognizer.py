@@ -133,6 +133,8 @@ async def receiver(loop, serial_port_ACM):
 '''
 def recognize_worker():
 
+    global mqttc
+
     # Audio variables
     global audio_queue
     global shelly_id
@@ -165,8 +167,8 @@ def recognize_worker():
             continue
         else:
             if voice != '':
-                if all(x in voice for x in matches_on): publish.single(topic=shelly_id+"/command/switch:0", payload="on", qos=2)
-                elif all(x in voice for x in matches_off): publish.single(topic=shelly_id+"/command/switch:0", payload="off", qos=2)
+                if all(x in voice for x in matches_on): mqttc.publish(topic=shelly_id+"/command/switch:0", payload="on", qos=2)
+                elif all(x in voice for x in matches_off): mqttc.publish(topic=shelly_id+"/command/switch:0", payload="off", qos=2)
     
     print("Exiting recognizer worker")
 
