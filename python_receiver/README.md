@@ -220,7 +220,7 @@ while True:
         # recognize speech using Wit.ai
         WIT_AI_KEY = engine_KEY  # Wit.ai keys are 32-character uppercase alphanumeric strings
         try:
-            voice = str(r.recognize_wit(audio, key=WIT_AI_KEY)).lower()         
+            voice = str(r.recognize_wit_new(audio, key=WIT_AI_KEY)).lower()         
         except sr.UnknownValueError:
             print("Wit.ai could not understand audio")
         except sr.RequestError as e:
@@ -231,6 +231,14 @@ while True:
             if voice != '':
                 if all(x in voice for x in matches_on): publish.single(topic=shelly_id+"/command/switch:0", payload="on", qos=2)
                 elif all(x in voice for x in matches_off): publish.single(topic=shelly_id+"/command/switch:0", payload="off", qos=2)
+```
+❗ You cannot use the Python receiver as is. ❗
+
+I've modified the source code of the [Speech Recognition library](https://github.com/Uberi/speech_recognition/pull/750) due to deprecation warning by Wit.AI. Until the pull request is accepted and integrated into a new release available via PIP, you'll need to replace the `__init__.py` file found typically when installing the library via `pip install SpeechRecognition` in the `site-packages` folder within the Python path with the [revised `__init__.py`](https://github.com/TIT8/BLE-sensor_PDM-microphone/blob/master/python_receiver/speech_recognition_update/__init__.py). If this explanation is too lengthy, you can simply substitute the `try` block with the snippet provided below. This change is also backward compatible with the previous `__init__.py` file.
+
+```python3
+        try:
+            voice = str(r.recognize_wit(audio, key=WIT_AI_KEY)).lower() 
 ```
 
 ❗ The script is capable of searching for an Arduino device attached to the serial port and will automatically establish a connection to it, managing any eventual disconnection on its own. <ins>You won't need to make any changes</ins>.   
