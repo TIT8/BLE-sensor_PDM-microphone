@@ -22,6 +22,7 @@ import time
 import re
 import uuid
 import wave
+import urllib3
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -764,7 +765,7 @@ class Recognizer(AudioSource):
             convert_rate=None if audio_data.sample_rate >= 8000 else 8000,  # audio samples must be at least 8 kHz
             convert_width=2  # audio samples should be 16-bit
         )
-        url = "https://api.wit.ai/speech?v=20210926"    # The last version of Wit.AI API that doesn't return multiple json responses (and it's not deprecated)
+        url = "https://api.wit.ai/speech?v=20210926"
         request = Request(url, data=wav_data, headers={"Authorization": "Bearer {}".format(key), "Content-Type": "audio/wav"})
         try:
             response = urlopen(request, timeout=self.operation_timeout)
@@ -793,33 +794,34 @@ class Recognizer(AudioSource):
             Returns the most likely transcription if ``show_all`` is false (the default). Otherwise, returns the `raw API response <https://wit.ai/docs/http/20141022#get-intent-via-text-link>`__ as a JSON dictionary.
     
             Raises a ``speech_recognition.UnknownValueError`` exception if the speech is unintelligible. Raises a ``speech_recognition.RequestError`` exception if the speech recognition operation failed, if the key isn't valid, or if there is no internet connection.
-            
-            Two possible string can be passed as "api" variable: "dictation" (default) and "speech". The version can be added 
-            like (speech?v=20240304), otherwise Wit.AI will use the latest automatically
             """
             assert isinstance(audio_data, AudioData), "Data must be audio data"
-            assert isinstance(key, str), "``key`` must be a string"
+            assert isinstance(key, str), "``key`` must be a string"           
             assert isinstance(api, str), "``api`` must be a string"
-    
+        
             wav_data = audio_data.get_wav_data(
                 convert_rate=None if audio_data.sample_rate >= 8000 else 8000,  # audio samples must be at least 8 kHz
                 convert_width=2  # audio samples should be 16-bit
             )
             
             url = "https://api.wit.ai/" + api
-            request = Request(url, data=wav_data, headers={"Authorization": "Bearer {}".format(key), "Content-Type": "audio/wav"})
+            #request = Request(url, data=wav_data, headers={"Authorization": "Bearer {}".format(key), "Content-Type": "audio/wav"})
             try:
-                response = urlopen(request, timeout=self.operation_timeout)
+                response = urllib3.request("POST", url=url, body=wav_data, headers={"Authorization": "Bearer {}".format(key), "Content-Type": "audio/wav"})
+                #response = urlopen(request, timeout=self.operation_timeout)
             except HTTPError as e:
                 raise RequestError("recognition request failed: {}".format(e.reason))
             except URLError as e:
                 raise RequestError("recognition connection failed: {}".format(e.reason))
                 
-            response_text = response.read().decode("utf-8")
-            concat_json = re.sub("\n}\r\n{\n", "\n},\n{\n", response_text)
-            concat_json_str = f"[{concat_json}]"
-            results = json.loads(concat_json_str)
-    
+            #response_text = response.read().decode("utf-8")
+            #concat_json = re.sub("\n}\r\n{\n", "\n},\n{\n", response_text)
+            #concat_json_str = f"[{concat_json}]"
+            #results = json.loads(concat_json_str)
+
+            d = re.sub("\n}\r\n{\n", "\n},\n{\n", response.data.decode())
+            results = json.loads(f"[{d}]")
+            
             # return results
             if show_all: return results
             for result in results:
