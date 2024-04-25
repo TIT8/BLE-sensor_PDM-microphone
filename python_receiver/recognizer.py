@@ -141,8 +141,8 @@ def recognize_worker():
     # Speech recognition variable
     r = sr.Recognizer()
     engine_KEY = "<Wit.Ai KEY>"     # Set the Wit.Ai key, you must register to their services
-    matches_on = ["cendi", "luc"]
-    matches_off = ["egni", "luc"]
+    matches_on = ["accend", "luc"]
+    matches_off = ["spegn", "luc"]
     
     print("Starting recognizer worker")
     
@@ -156,7 +156,7 @@ def recognize_worker():
         # recognize speech using Wit.ai
         WIT_AI_KEY = engine_KEY  # Wit.ai keys are 32-character uppercase alphanumeric strings
         try:
-            voice = str(r.recognize_wit(audio, key=WIT_AI_KEY)).lower()         
+            voice = str(r.recognize_wit_new(audio, key=WIT_AI_KEY)).lower()         
         except sr.UnknownValueError:
             print("Wit.ai could not understand audio")
         except sr.RequestError as e:
