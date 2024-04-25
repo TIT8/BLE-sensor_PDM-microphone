@@ -47,11 +47,15 @@ except:
 ```
 
 If a connection is established, we begin to receive data, handling any eventual timeouts. 
+##### BE CAREFUL WITH TIMEOUTS! 
+In Python, the Global Interpreter Lock (GIL) restricts execution so that only one thread can run at a time. Consequently, if we have three threads, only one can execute at any given moment. If the speech recognizer thread (referenced [below](#the-speech-recognizer-loop-run-in-another-thread!)) takes too long, it can delay the release of the GIL. When the GIL is eventually released and control is returned to the asyncio loop/task, it may exceed its allotted time, triggering a coroutine timeout. This situation may lead to the serial being restarted, resulting in a loss of responsiveness for seconds.
+
+<ins>That's why, when working in Python, I prefer using an "online API" like Wit.AI. This approach transforms a CPU-bound task like audio transcription into an IO-bound task, as it waits for responses from an external META server. During this wait period, the GIL can be released in favor of the asyncio loop, maintaining high responsiveness to user voice input.</ins> If you opt for an offline speech recognizer, consider using [multiprocessing](https://docs.python.org/3/library/multiprocessing.html) instead of multithreading, especially in Python.
 
 ```python3
 while event.is_set() and not stop.is_set():
     
-    deadline = loop.time() + 2        # Timeout of two seconds
+    deadline = loop.time() + 2        # Timeout of two seconds, enough in my tests
     try:
         async with asyncio.timeout_at(deadline):
             data = await reader.readexactly(bufsize * 2)    # In order to read 512 samples of 16 bit each, I need 1024 bytes
@@ -200,6 +204,8 @@ Now onto the fun part: digital signal processing. We have present data (`x`) and
 ```
 
 So when enough data is collected, it is sent via a [Queue](https://docs.python.org/3/library/queue.html) to the recognizer thread that is waiting for it, resetting all the variables to become ready to start new sampling. When `y` becomes large enough, we cut the first part and start writing on the last one, swapping the two first.
+
+#### The speech recognizer loop run in another thread!
 
 Subsequently, we transmit the data to Wit.Ai, and the received string is utilized to search for matching keywords, determining the action to be taken with the bedroom light. The light is controlled through a Shelly Plus 1 relay connected to an MQTT broker on a Raspberry Pi 4, where the recognizer script also runs (via a scheduled worker in systemctl). This is why _paho_ will connect to _localhost_.
 
