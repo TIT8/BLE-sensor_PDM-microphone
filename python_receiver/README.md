@@ -344,7 +344,7 @@ If you use the script on Windows, using `read(1024)` or `readexactly(1024)` meth
 
 While on Linux, it is important to note that Asyncio will return immediately when observing the file descriptor, and it is not guaranteed that the `read()` method will yield enough samples. Indeed, using `read(1024)` in this manner can offer low latency, but it also exposes the signal processing section of the code to potential bugs (although you can mitigate this by utilizing the `x.size` variable instead of `bufsize`, it still may not be the optimal solution). However, with `readexactly()`, you won't notice any difference in the end. It was all conjecture 🤦‍♂️.
 
-:lizard: If you want something low latency you have to move the speech recognition from online to offline on device, like I did [here](https://github.com/TIT8/shelly_button_esp32_arduino/tree/master/speech_recognition).
+🦎 If you're aiming for low latency, consider shifting speech recognition from online to offline on the device, as demonstrated [here](https://github.com/TIT8/shelly_button_esp32_arduino/tree/master/speech_recognition). However, it's not necessarily a significantly better approach than the one I've described to you so far and it can be worst.
 
 ## My use case
 
