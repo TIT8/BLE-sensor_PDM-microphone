@@ -48,20 +48,21 @@ async def receiver(loop, serial_port_ACM):
     # Serial COMM
     baudrate = 115200
 
-    # Preparing buffers
-    y = np.array([], np.int16)
-    z = np.array([], np.int16)
-
     # Signal processing variables
     bufsize = 512   # It's the size of the numpy array 'x'
-    seconds_to_reset = 200 
+    seconds_to_reset = 200
     conversion = 32     # 32 conversion * 512 bufsize == 1 second at 16KHz of sample rate (almost)
     N = seconds_to_reset * conversion * bufsize     # == [seconds] of recording (almost)
     samp = False
     i = 0
+    n = 0
     listening_for = 1.5   # * conversion == [second/bufsize]
     trigger_volume = 17000  # If the audio samples have magnitude greater than this start listening
 
+    # Preparing buffers
+    y = np.zeros(int(N), np.int16)
+    z = np.zeros(int((listening_for + 1) * conversion * bufsize), np.int16)
+    t = np.zeros(int(listening_for * conversion * bufsize), np.int16)
     
     try:
         reader, writer = await serial_asyncio_fast.open_serial_connection(url=serial_port_ACM, baudrate=baudrate)
@@ -85,7 +86,7 @@ async def receiver(loop, serial_port_ACM):
         # Data in input is buffered as 16bit, so 1024 bytes are coming at burst
         x = np.frombuffer(data, np.int16)
         # Continuous data recording
-        y = np.append(y, x, axis=0)
+        y[n * bufsize: (n+1) * bufsize] = x
 
         '''
             Run to completion state machine, non blocking
@@ -94,34 +95,33 @@ async def receiver(loop, serial_port_ACM):
             # Too loud, start listening for <listening_for>
             samp = True
 
-        if samp == True and i <= listening_for * conversion:
-            # Collect also the second before the activation
-            if i == 0 and y.size > conversion * bufsize: z = np.append(z, y[-(conversion + 1) * bufsize:-bufsize], axis=0)
-            z = np.append(z, x, axis=0)
-            i += 1
+        if samp == True: 
+            # Listen and collect data
+            if i < listening_for * conversion:
+                # Collect also the second before the activation
+                if i == 0:
+                    if n >= conversion: z[:bufsize * conversion] = y[(n - conversion) * bufsize: n * bufsize]
+                    else: z[:bufsize * conversion] = np.roll(y,conversion*bufsize,0)[n * bufsize: (n+conversion) * bufsize]
+                t[i * bufsize: (i+1) * bufsize] = x
+                i += 1
 
-        # Use >= to be sure to enter in this state
-        if z.size >= (bufsize * (listening_for + 1) * conversion) and i >= listening_for * conversion:
-            # Send to speech recognizer thread and reset 
-            audio_queue.put(z)
-            z = np.array([], np.int16)
-            samp = False
-            i = 0
-        elif i >= listening_for * conversion:
-            # Restart listening without sending (this happen when mic is connected, it return high value, but meaningless)
-            z = np.array([], np.int16)
-            samp = False
-            i = 0
+            # Use >= to be sure to enter in this state
+            if i >= listening_for * conversion:
+                # Send to speech recognizer thread and reset 
+                z[bufsize * conversion:] = t
+                samp = False
+                i = 0
+                audio_queue.put(z)
 
-        if y.size >= N and not samp:
-            # Keep the last half of the background recording
-            y = np.delete(y, np.s_[math.ceil(-y.size/2)-1::-1], 0)
-
+        if n < conversion * seconds_to_reset - 1:
+            n += 1
+        else:
+            n = 0
 
     if writer is not None:
         writer.transport.abort()    # Safe release of the serial communication port
         await asyncio.sleep(1)
-
+    
     await asyncio.sleep(1)
     print("Exiting coroutine")      # Stopping the loop
 
@@ -169,7 +169,7 @@ def recognize_worker():
             if voice != '':
                 if all(x in voice for x in matches_on): mqttc.publish(topic=shelly_id+"/command/switch:0", payload="on", qos=2)
                 elif all(x in voice for x in matches_off): mqttc.publish(topic=shelly_id+"/command/switch:0", payload="off", qos=2)
-    
+
     print("Exiting recognizer worker")
 
 
@@ -278,7 +278,7 @@ def loop():
     while True:
 
         event.set()
-
+        
         serial_port = ''
         for serial_port_name in serial_ports():
             if "ACM" in serial_port_name:
@@ -286,13 +286,13 @@ def loop():
                 
         subprocess.run(["fuser", "-k", serial_port])    # Kill process that are using the MIC, if any
         time.sleep(1)   # Give the OS time to start other services
-
+        
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-
+            
         for sig in (signal.SIGINT, signal.SIGTERM):
             loop.add_signal_handler(sig, ask_exit)      # Handle external signal, also SIGTERM from OS
-            
+
         try:
             loop.run_until_complete(receiver(loop, serial_port))
         except:
@@ -303,7 +303,7 @@ def loop():
 
         while not audio_queue.empty():
             audio_queue.get()           # Empty the queue to restart listening wihtout interfering with old samples
-            
+
         time.sleep(2)
         loop.close()
 
