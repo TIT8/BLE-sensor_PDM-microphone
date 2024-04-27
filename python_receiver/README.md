@@ -17,21 +17,23 @@ Samples from the Arduino Nano 33 BLE Sense PDM microphone arrive at a sample rat
 
 ```python3
 # Serial COMM
-baudrate = 115200
+    baudrate = 115200
 
-# Preparing buffers
-y = np.array([], np.int16)
-z = np.array([], np.int16)
+    # Signal processing variables
+    bufsize = 512   # It's the size of the numpy array 'x'
+    seconds_to_reset = 200
+    conversion = 32     # 32 conversion * 512 bufsize == 1 second at 16KHz of sample rate (almost)
+    N = seconds_to_reset * conversion * bufsize     # == [seconds] of recording (almost)
+    samp = False
+    i = 0
+    n = 0
+    listening_for = 1.5   # * conversion == [second/bufsize]
+    trigger_volume = 17000  # If the audio samples have magnitude greater than this start listening
 
-# Signal processing variables
-bufsize = 512   # It's the size of the numpy array 'x'
-seconds_to_reset = 200 
-conversion = 32     # 32 conversion * 512 bufsize == 1 second at 16KHz of sample rate (almost)
-N = seconds_to_reset * conversion * bufsize     # == [seconds] of recording (almost)
-samp = False
-i = 0
-listening_for = 1.5   # * conversion == [second/bufsize]
-trigger_volume = 17000  # If the audio samples have magnitude greater than this start listening
+    # Preparing buffers
+    y = np.zeros(int(N), np.int16)
+    z = np.zeros(int((listening_for + 1) * conversion * bufsize), np.int16)
+    t = np.zeros(int(listening_for * conversion * bufsize), np.int16)
 ```
 
 We use Asyncio [`StreamReader`](https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamReader) and [`StreamWriter`](https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamWriter) as interfaces with the serial port. The try and except block will handle problems with the connection. Please read the [source code](https://github.com/home-assistant-libs/pyserial-asyncio-fast/blob/c3153083a5fb734f4361215ce404a2421b2664b7/serial_asyncio_fast/__init__.py#L560) of the `serial_asyncio_fast.open_serial_connection()` coroutine.
@@ -163,44 +165,44 @@ So to learn more, check the [Python source code](https://github.com/python/cpyth
 Once 1024 bytes are received, we must process the data, so NumPy comes into play, transforming the data read into a buffer of 512 samples of 16 bits each. We save incoming samples in the `y` buffer; this way, we collect the history of the sampled audio.
 
 ```python3
-    # Data in input is buffered as 16bit, so 1024 bytes are coming at burst
-    x = np.frombuffer(data, np.int16)
-    # Continuous data recording
-    y = np.append(y, x, axis=0)
+        # Data in input is buffered as 16bit, so 1024 bytes are coming at burst
+        x = np.frombuffer(data, np.int16)
+        # Continuous data recording
+        y[n * bufsize: (n+1) * bufsize] = x
 ```
 
-Now onto the fun part: digital signal processing. We have present data (`x`) and past data (`y`). If the volume of the present data is too high, we start sampling for a time given by the `listening_for` variable, collecting the samples in the `z` buffer. For instance, when I say "ACCENDI LUCE", usually from an audio point of view, the "C" is what goes above the volume limit, so there is a possibility to cut the starting of the keywords. This is where `y` (the history) comes into play: at the beginning, `z` will save the second before the sampling starts.
+Now onto the fun part: digital signal processing. We have present data (`x`) and past data (`y`). If the volume of the present data is too high, we start sampling for a time given by the `listening_for` variable, collecting the samples in the `z` buffer. For instance, when I say "ACCENDI LUCE", usually from an audio point of view, the "C" is what goes above the volume limit, so there is a possibility to cut the starting of the keywords. This is where `y` (the history) comes into play: at the beginning, `z` will save the second before the sampling starts. I'm using fixed size Numpy arrays, so this state machine is fast and efficient with respect to `numpy.append()` (indeed CPU utilization is decreased of 10% on both Windows and Linux going from dinamically to statically sized arrays).
 
 ```python3
-    '''
-        Run to completion state machine, non blocking
-    '''
-    if x.max(0) >= trigger_volume and not samp:
-        # Too loud, start listening for <listening_for>
-        samp = True
-
-    if samp == True and i <= listening_for * conversion:
-        # Collect also the second before the activation
-        if i == 0 and y.size > conversion * bufsize: z = np.append(z, y[-(conversion + 1) * bufsize:-bufsize], axis=0)
-        z = np.append(z, x, axis=0)
-        i += 1
-
-    # Use >= to be sure to enter in this state
-    if z.size >= (bufsize * (listening_for + 1) * conversion) and i >= listening_for * conversion:
-        # Send to speech recognizer thread and reset 
-        audio_queue.put(z)
-        z = np.array([], np.int16)
-        samp = False
-        i = 0
-    elif i >= listening_for * conversion:
-        # Restart listening without sending (this happen when mic is connected, it return high value, but meaningless)
-        z = np.array([], np.int16)
-        samp = False
-        i = 0
-
-    if y.size >= N and not samp:
-        # Keep the last half of the background recording
-        y = np.delete(y, np.s_[math.ceil(-y.size/2)-1::-1], 0)
+        '''
+            Run to completion state machine, non blocking
+        '''
+        if x.max(0) >= trigger_volume and not samp:
+            # Too loud, start listening for <listening_for>
+            samp = True
+        
+        if samp == True: 
+            # Listen and collect data
+            if i < listening_for * conversion:
+                # Collect also the second before the activation
+                if i == 0:
+                    if n >= conversion: z[:bufsize * conversion] = y[(n - conversion) * bufsize: n * bufsize]
+                    else: z[:bufsize * conversion] = np.roll(y,conversion*bufsize,0)[n * bufsize: (n+conversion) * bufsize]
+                t[i * bufsize: (i+1) * bufsize] = x
+                i += 1
+        
+            # Use >= to be sure to enter in this state
+            if i >= listening_for * conversion:
+                # Send to speech recognizer thread and reset 
+                z[bufsize * conversion:] = t
+                samp = False
+                i = 0
+                audio_queue.put(z)
+        
+        if n < conversion * seconds_to_reset - 1:
+            n += 1
+        else:
+            n = 0
 ```
 
 So when enough data is collected, it is sent via a [Queue](https://docs.python.org/3/library/queue.html) to the recognizer thread that is waiting for it, resetting all the variables to become ready to start new sampling. When `y` becomes large enough, we cut the first part and start writing on the last one, swapping the two first.
