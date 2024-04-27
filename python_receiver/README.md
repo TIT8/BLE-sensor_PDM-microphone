@@ -367,7 +367,7 @@ Import the necessary packages into your Python environment. The packages used ar
 * [Pyserial](https://github.com/pyserial/pyserial) master branch (`pip install git+https://github.com/pyserial/pyserial`)
 * [Pyserial asyncio fast](https://github.com/home-assistant-libs/pyserial-asyncio-fast) because it is more up-to-date (`pip install git+https://github.com/home-assistant-libs/pyserial-asyncio-fast`)
 * Numpy
-* [Speech Recognition fork](https://github.com/TIT8/speech_recognition)
+* [Speech Recognition fork](https://github.com/TIT8/speech_recognition) master branch (`pip install git+https://github.com/TIT8/speech_recognition`)
 * [Paho MQTT](https://pypi.org/project/paho-mqtt/)
 
 ## References
