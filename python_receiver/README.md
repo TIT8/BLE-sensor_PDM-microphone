@@ -339,14 +339,16 @@ def ask_exit():
     print("Exiting...")
 ```
 
-## Curiosity
+## Curiosities
 
-If you use the script on Windows, using `read(1024)` or `readexactly(1024)` methods of the reader coming from `open_serial_connection` won't make any difference because the PySerial Asyncio library on Windows is based on [busy polling](https://github.com/home-assistant-libs/pyserial-asyncio-fast/blob/c3153083a5fb734f4361215ce404a2421b2664b7/serial_asyncio_fast/__init__.py#L324) (the loop calls the OS every 5ms to read samples until 1024 bytes, which is the [default limit](https://github.com/home-assistant-libs/pyserial-asyncio-fast/blob/c3153083a5fb734f4361215ce404a2421b2664b7/serial_asyncio_fast/__init__.py#L70) of the library).
-❗ On Windows, this receiver won't work as is because [`loop.add_signal_handler`](https://docs.python.org/3/library/asyncio-eventloop.html#unix-signals) is only compatible with Linux. Therefore, you should remove that part of the code. However, it's important to note that Windows is capable of interrupting the code even when it doesn't handle signals. **If you use WSL, this code will work as is**.
+- If you use the script on Windows, using `read(1024)` or `readexactly(1024)` methods of the reader coming from `open_serial_connection` won't make any difference because the PySerial Asyncio library on Windows is based on [busy polling](https://github.com/home-assistant-libs/pyserial-asyncio-fast/blob/c3153083a5fb734f4361215ce404a2421b2664b7/serial_asyncio_fast/__init__.py#L324) (the loop calls the OS every 5ms to read samples until 1024 bytes, which is the [default limit](https://github.com/home-assistant-libs/pyserial-asyncio-fast/blob/c3153083a5fb734f4361215ce404a2421b2664b7/serial_asyncio_fast/__init__.py#L70) of the library).
+❗ On Windows, this receiver won't work as is because [`loop.add_signal_handler`](https://docs.python.org/3/library/asyncio-eventloop.html#unix-signals) is only compatible with Linux. Therefore, you should remove that part of the code. However, it's important to note that Windows is capable of interrupting the code even when it doesn't handle signals. **If you use [WSL](https://learn.microsoft.com/en-us/windows/wsl/install), this code will work as is**.
 
-While on Linux, it is important to note that Asyncio will return immediately when observing the file descriptor, and it is not guaranteed that the `read()` method will yield enough samples. Indeed, using `read(1024)` in this manner can offer low latency, but it also exposes the signal processing section of the code to potential bugs (although you can mitigate this by utilizing the `x.size` variable instead of `bufsize`, it still may not be the optimal solution). However, with `readexactly()`, you won't notice any difference in the end. It was all conjecture 🤦‍♂️.
+- While on Linux, it is important to note that Asyncio will return immediately when observing the file descriptor, and it is not guaranteed that the `read()` method will yield enough samples. Indeed, using `read(1024)` in this manner can offer low latency, but it also exposes the signal processing section of the code to potential bugs (although you can mitigate this by utilizing the `x.size` variable instead of `bufsize`, it still may not be the optimal solution). However, with `readexactly()`, you won't notice any difference in the end. It was all conjecture 🤦‍♂️.
 
-🦎 If you're aiming for low latency, consider shifting speech recognition from online to offline on the device, as demonstrated [here](https://github.com/TIT8/shelly_button_esp32_arduino/tree/master/speech_recognition). However, it's not necessarily a significantly better approach than the one I've described to you so far and it can be worst.
+- 🦎 If you're aiming for low latency, consider shifting speech recognition from online to offline on the device, as demonstrated [here](https://github.com/TIT8/shelly_button_esp32_arduino/tree/master/speech_recognition). However, it's not necessarily a significantly better approach than the one I've described to you so far and it can be worst.
+
+- If you wish to work with the raw PCM samples from the Arduino, please refer to the binary file sample shared in the [test_golang](https://github.com/TIT8/BLE-sensor_PDM-microphone/tree/master/python_receiver/test_golang) directory. You can listen to it using the instructions provided [below](#try-to-listen-to-what-arduino-nano-33-ble-sense-produce).
 
 ## My use case
 
@@ -359,7 +361,7 @@ And these are the resource consumption metrics from the `top -i` Linux command:
 ![Screenshot (106)](https://github.com/TIT8/BLE-sensor_PDM-microphone/assets/68781644/36042cb6-9393-4d91-8219-c88ed24495de)
 ![Screenshot (105)](https://github.com/TIT8/BLE-sensor_PDM-microphone/assets/68781644/cf6c0fb1-df31-4fb9-ad09-2160c3ac28f4)
 
-Try to listen to what Arduino Nano 3 BLE Sense produce:
+#### Try to listen to what Arduino Nano 33 BLE Sense produce:
 
 ```bash
 ffplay -f s16le -ar 16000 microphone-results.wav
