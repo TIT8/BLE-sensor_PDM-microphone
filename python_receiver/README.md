@@ -359,6 +359,12 @@ And these are the resource consumption metrics from the `top -i` Linux command:
 ![Screenshot (106)](https://github.com/TIT8/BLE-sensor_PDM-microphone/assets/68781644/36042cb6-9393-4d91-8219-c88ed24495de)
 ![Screenshot (105)](https://github.com/TIT8/BLE-sensor_PDM-microphone/assets/68781644/cf6c0fb1-df31-4fb9-ad09-2160c3ac28f4)
 
+Try to listen to what Arduino Nano 3 BLE Sense produce:
+
+```bash
+ffplay -f s16le -ar 16000 microphone-results.wav
+```
+
 
 ## Required Packages
 
