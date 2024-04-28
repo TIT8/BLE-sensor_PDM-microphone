@@ -231,8 +231,8 @@ while True:
             continue
         else:
             if voice != '':
-                if all(x in voice for x in matches_on): publish.single(topic=shelly_id+"/command/switch:0", payload="on", qos=2)
-                elif all(x in voice for x in matches_off): publish.single(topic=shelly_id+"/command/switch:0", payload="off", qos=2)
+                if all(x in voice for x in matches_on): mqttc.publish(topic=shelly_id+"/command/switch:0", payload="on", qos=2)        # global mqttc
+                elif all(x in voice for x in matches_off): mqttc.publish(topic=shelly_id+"/command/switch:0", payload="off", qos=2)
 ```
 ❗ You cannot use the Python receiver as is. ❗
 
@@ -364,7 +364,7 @@ And these are the resource consumption metrics from the `top -i` Linux command:
 #### Try to listen to what Arduino Nano 33 BLE Sense produce:
 
 ```bash
-ffplay -f s16le -ar 16000 microphone-results.wav
+ffplay -f s16le -ar 16000 -autoexit microphone-results.wav
 ```
 
 
