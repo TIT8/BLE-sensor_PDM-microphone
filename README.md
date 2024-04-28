@@ -47,7 +47,7 @@ Utilize [nRF Connect](https://www.nordicsemi.com/Products/Development-tools/nRF-
 
 ➕ This approach is working very well: collecting audio samples, sending them to a serial device that manages the connection with the Wit.Ai API and takes action based on the transcribed text. The Wit.Ai AI performs incredibly well, being trained by Meta, and **you could also train it to better recognize your keywords**. So it's very reliable. 
 
-➖ However, latency is the primary issue; for instance, when I say "accendi luce," it takes 1-2 seconds before the light turns on (though without errors, it does always turn on! :mechanical_arm:).
+➖/➕ However, latency remains the primary concern. For instance, when I say "accendi luce," it takes 1-2 seconds before the light turns on (although, without errors, it consistently does turn on! :mechanical_arm:). Nevertheless, from my testing, it executes actions so swiftly that I hesitate to consider it slow. As with any system dealing with human-time-asynchronous events/inputs, there's little that can be done to further reduce the action time.
 
 ➖ Data privacy is a concern; hence, <ins>the Python receiver I developed sends data to the Wit.Ai API only when the captured audio reaches a sufficiently high volume</ins> (as intended, I'm talking to the Arduino with a certain level which I don't use with my brother in the room normally), rather than through continuous streaming.
 
