@@ -41,7 +41,8 @@ If you don't know what an operating system does, [this video](https://www.youtub
 Utilize [nRF Connect](https://www.nordicsemi.com/Products/Development-tools/nRF-Connect-for-mobile) on a smartphone, a [Python script](https://github.com/TIT8/BLE-sensor_PDM-microphone/tree/master/python_test_ble) on PC/MAC, or an [ESP32](https://github.com/TIT8/BLE_esp32) if available.
 
 <img src="https://github.com/TIT8/BLE-sensor_PDM-microphone/assets/68781644/3d87bad1-526b-4154-853f-053570986b97" width="200" height="400">
-<img src="https://github.com/TIT8/BLE-sensor_PDM-microphone/assets/68781644/cea82b78-370a-49f6-8f3a-3a4cce8ff1a8" width="200" height="400">
+<img src="https://github.com/TIT8/BLE-sensor_PDM-microphone/assets/68781644/3756ee05-ef1f-484b-94cd-6b1e372609d2" width="200" height="400">
+
 
 ## Pros and cons of speech recognition task
 
