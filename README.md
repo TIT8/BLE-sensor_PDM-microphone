@@ -38,7 +38,7 @@ If you don't know what an operating system does, [this video](https://www.youtub
 
 ## How to test the BLE task?
 
-Utilize [nRF Connect](https://www.nordicsemi.com/Products/Development-tools/nRF-Connect-for-mobile) on a smartphone, a [Python script](https://github.com/TIT8/BLE-sensor_PDM-microphone/tree/master/python_test_ble) on PC/MAC, or an [ESP32](https://github.com/TIT8/BLE_esp32) if available.
+Utilize [nRF Connect](https://www.nordicsemi.com/Products/Development-tools/nRF-Connect-for-mobile) on a smartphone, a [Python script](https://github.com/TIT8/BLE-sensor_PDM-microphone/tree/master/python_test_ble) on PC/MAC, or an [ESP32](https://github.com/TIT8/BLE_esp32) if available. And, by the way, no, I'm not sending float directly, but remember this [discussion](https://forum.arduino.cc/t/passing-float-values-with-bluetooth/656814) in the future.
 
 <img src="https://github.com/TIT8/BLE-sensor_PDM-microphone/assets/68781644/3d87bad1-526b-4154-853f-053570986b97" width="200" height="400">
 <img src="https://github.com/TIT8/BLE-sensor_PDM-microphone/assets/68781644/3756ee05-ef1f-484b-94cd-6b1e372609d2" width="200" height="400">
