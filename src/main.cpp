@@ -34,7 +34,7 @@ BLE config section
 BLEService humService("181A"); // Enviromental Sensing Service UUID
 BLEDescriptor humDescriptor("2901", "Humidity"); // Characteristic User Description UUID
 // I'm using the 0x2A6F UUID for humidity sensors, but you can use your custom one 
-BLEIntCharacteristic humCharacteristic("2A6F", BLERead | BLENotify);
+BLEUnsignedLongCharacteristic humCharacteristic("2A6F", BLERead | BLENotify);
 void updateHumidityValue();
 float old_hum = 0;
 long previousMillis = 0;   
@@ -59,12 +59,12 @@ Setup
 
 void setup() 
 {
+  // Start thread
+  ble_thread.start(ble_loop);
+
   // Baudrate need to be equal to receiver's one
   Serial.begin(115200);
   while (!Serial);
-
-  // Start thread
-  ble_thread.start(ble_loop);
 
   // Configure the data receive callback
   PDM.onReceive(onPDMdata);
@@ -196,7 +196,8 @@ void updateHumidityValue()
   // Send only when a significant change is sensed
   if (abs(old_hum - humidity) >= 1 )
   {
-    humCharacteristic.writeValue((unsigned int)humidity * 100); 
+    // Write in Little Endian (https://github.com/arduino-libraries/ArduinoBLE/blob/98ff550988912ffbaeb1d877970e9e05f1de0599/src/BLETypedCharacteristic.h#L69)
+    humCharacteristic.writeValue(humidity * 100);   
     old_hum = humidity;
   }
 }
