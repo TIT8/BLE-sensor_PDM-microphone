@@ -2,6 +2,9 @@ import argparse
 import asyncio
 import logging
 import signal
+import os
+import sys
+from concurrent.futures.thread import ThreadPoolExecutor
 
 from bleak import BleakClient, BleakScanner
 from bleak.backends.characteristic import BleakGATTCharacteristic
@@ -16,16 +19,27 @@ def signal_handler(sig, frame):
     global condition
     condition = True
     logger.critical('Stop signal detected!')
+    if os.name == 'posix':
+        logger.critical('Press <CTRL+D> or <Enter> to finish')
+        # While on Windows CTRL+C is already an EOF for sys readline()
 
 
 # Handler registered when event occurring
 def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearray):
     """Simple notification handler which prints the data received."""
-    logger.info("%s: %d%%", characteristic.description, int.from_bytes(data, "little") / 100)
+    logger.info("%s notify: %.2f%%", characteristic.description, int.from_bytes(data, "little") / 100)
+
+
+# Handle client request from command line
+async def async_read_stdin() -> str:
+    loop = asyncio.get_event_loop()
+    # This is stopped whenever reach EOF from command line
+    return await loop.run_in_executor(ThreadPoolExecutor(1), sys.stdin.readline)
 
 
 async def main(args: argparse.Namespace):
     logger.info("starting scan...")
+    global condition
 
     # Check what the user typed in the terminal and BLE scanning
     if args.address:
@@ -50,7 +64,13 @@ async def main(args: argparse.Namespace):
 
     def disconnected_callback(client):
         disconnected_event.set()
-        logger.warning("BLE server disconnected! Closing...")
+        if condition == True:
+                logger.warning("BLE server disconnected!")
+        else:
+            if os.name == 'posix':
+                logger.warning("BLE server disconnected! Please, press <CTRL+D> or <Enter> to finish")
+            else:
+                logger.warning("BLE server disconnected! Please, press <Enter> to finish")
 
     # Connection with the device requested
     async with BleakClient(device, disconnected_callback) as client:
@@ -60,10 +80,28 @@ async def main(args: argparse.Namespace):
         uuid = uuids.normalize_uuid_16(int(args.characteristic, 16))
         await client.start_notify(uuid, notification_handler)
 
+        # Search for the desired descriptor 
+        descriptor = ''
+        service = client.services
+        for d in service.descriptors:
+            s = await client.read_gatt_descriptor(d)
+            if "humidity" in str(s).lower():
+                descriptor = s
+
         # Until stopped, give to the other coroutines chances to run,
-        # since AsynIO uses a cooperative multitasking model
-        global condition
+        # since AsynIO uses a cooperative multitasking model, so the
+        # while loop must block sometimes
+        print('Write "read" at any time if you want to read the BLE data')
         while not condition and not disconnected_event.is_set(): 
+            # Make possible to read the Characteristic even when nothing get notified
+            line = await async_read_stdin()
+            if "read" in str(line).lower():
+                if client.is_connected:
+                    hum = await client.read_gatt_char(uuid)
+                    if os.name == 'nt':
+                        # Bleak on Windows doesn't handle read request with the notify callback
+                        logger.info("%s read: %.2f%%", str(descriptor.decode()), int.from_bytes(hum, "little") / 100)
+
             await asyncio.sleep(1.0) 
 
         # Close the connection if CTRL+C is pressed, otherwise the
