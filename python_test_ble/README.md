@@ -1,3 +1,5 @@
+# A test client for our Arduino BLE server
+
 ## How can I use the script?
 
 1) You have to install python and pip, then [bleak](https://github.com/hbldh/bleak?tab=readme-ov-file#installation).
@@ -5,6 +7,11 @@
 2) Download the script `test.py` and enter in the folder where it's been downloaded.
 
 3) Open a new terminal in that folder and type:
+
+    General (I've set this <[Name of the device](https://github.com/TIT8/BLE-sensor_PDM-microphone/blob/279eed03539bcb7410006116519fe02829c34209/src/main.cpp#L148)> and <[UUID](https://github.com/TIT8/BLE-sensor_PDM-microphone/blob/279eed03539bcb7410006116519fe02829c34209/src/main.cpp#L37)>, for example):
+   ```bash
+    python test.py --name "<Name of the device>" "<UUID>"
+    ```
 
     Windows:
     ```bash
@@ -16,16 +23,19 @@
     python3 test.py --name "Humidity monitor" "0x2A6F"
     ```
 
-4) You have to create your own UUID for your application. So you can [generate](https://www.uuidgenerator.net/) a custom one or choose one of the [assigned](https://www.bluetooth.com/specifications/assigned-numbers/) UUID from the standard.
+4) If the sensor doesn't notify anything because there isn't enough variation in humidity, you can type `read` and press enter in the command line once the script has started, and it will print the last value that the BLE server has written in the Characteristic.
 
-    :exclamation: I'm using the standard UUID assigned for humidity sensors (`0x2A6F`), see [here](https://github.com/TIT8/BLE/blob/20be417d86c0495ab896a8af8cc1322d0acc7b5b/src/main.cpp#L9). Make sure you set for the correct **Characteristic UUID** in the Arduino code.
+5) If you have a custom BLE server, you have to create your own UUID for your application. So you can [generate](https://www.uuidgenerator.net/) a custom one or choose one of the [assigned](https://www.bluetooth.com/specifications/assigned-numbers/) UUID from the standard. 
 
-5) Once started the script will listen for ever and print the data coming from humidity sensor. Use `CTRL+C` to exit from the script or disconnect from Bluetooth the client or the server, the script will handle disconnections.
+    :exclamation: I'm using the standard UUID assigned for humidity sensors (`0x2A6F`), see [here](https://github.com/TIT8/BLE/blob/20be417d86c0495ab896a8af8cc1322d0acc7b5b/src/main.cpp#L9). Make sure you set for the correct **Characteristic UUID** in the Arduino code. While the descriptor is ["Humidity"](https://github.com/TIT8/BLE-sensor_PDM-microphone/blob/279eed03539bcb7410006116519fe02829c34209/src/main.cpp#L35) with code `0x2901` (user defined as the standard says).
 
-6) Make sure to have the Bluetooth enabled on your PC/MAC.
+6) Once started the script will listen for ever and print the data coming from humidity sensor. Use `CTRL+C` to exit from the script or disconnect the Bluetooth server (Arduino here), the script will handle disconnections, but **you have to follow what the terminal says after**.
+
+7) Make sure to have the Bluetooth enabled on your PC/MAC. And remember: this won't work in WSL (as of April 2024).
 
 ## Final results
 
-![Screenshot (103)](https://github.com/TIT8/BLE-sensor_PDM-microphone/assets/68781644/6a875859-1662-45c1-b1b3-2e02983dfbe4)
+![Screenshot (109)](https://github.com/TIT8/BLE-sensor_PDM-microphone/assets/68781644/d4181f39-1f67-459f-bbe5-143023abd621)
+
 
 
