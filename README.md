@@ -10,6 +10,8 @@ I'm beginning to grasp concepts like RSSI and advertising, services and characte
 
 Here, I'm utilizing the [Notify](https://community.nxp.com/t5/Wireless-Connectivity-Knowledge/Indication-and-Notification/ta-p/1129270) feature of BLE, reminiscent of pub-sub protocols like MQTT. Referencing the [Arduino documentation](https://docs.arduino.cc/tutorials/nano-33-ble/bluetooth/) and the specifications outlined for the [Environmental Sensing Service](https://www.bluetooth.com/specifications/specs/environmental-sensing-service-1-0/) 📡 can provide further insight.
 
+Every time the humidity change at least of 1%, new data are written on the BLE Characteristic and different devices can access the values.
+
 _What better way to learn something new than with Arduino?_ 💪
 
 ## Mbed OS Structure
