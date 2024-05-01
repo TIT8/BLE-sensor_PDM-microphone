@@ -21,6 +21,8 @@ var (
 )
 
 func main() {
+	// Form PCM binary samples to WAV file
+	
 	file_data, err := os.ReadFile("./raw_wav.bin")
 	if err != nil {
 		panic(err)
