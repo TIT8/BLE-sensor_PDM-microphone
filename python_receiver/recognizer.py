@@ -17,12 +17,15 @@ from threading import Thread
 from queue import Queue
 import paho.mqtt.client as mqtt
 import paho.mqtt.publish as publish
+import uvloop
 
 
 
 '''
     Global variables
 '''
+
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())    # Only for Linux
 
 # Threading controls
 audio_queue = Queue()
