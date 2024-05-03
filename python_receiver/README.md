@@ -344,7 +344,9 @@ def ask_exit():
 - If you use the script on Windows, using `read(1024)` or `readexactly(1024)` methods of the reader coming from `open_serial_connection` won't make any difference because the PySerial Asyncio library on Windows is based on [busy polling](https://github.com/home-assistant-libs/pyserial-asyncio-fast/blob/c3153083a5fb734f4361215ce404a2421b2664b7/serial_asyncio_fast/__init__.py#L324) (the loop calls the OS every 5ms to read samples until 1024 bytes, which is the [default limit](https://github.com/home-assistant-libs/pyserial-asyncio-fast/blob/c3153083a5fb734f4361215ce404a2421b2664b7/serial_asyncio_fast/__init__.py#L70) of the library).
 ❗ On Windows, this receiver won't work as is because [`loop.add_signal_handler`](https://docs.python.org/3/library/asyncio-eventloop.html#unix-signals) is only compatible with Linux. Therefore, you should remove that part of the code. However, it's important to note that Windows is capable of interrupting the code even when it doesn't handle signals. **If you use [WSL](https://learn.microsoft.com/en-us/windows/wsl/install), this code will work as is**.
 
-- While on Linux, it is important to note that Asyncio will return immediately when observing the file descriptor, and it is not guaranteed that the `read()` method will yield enough samples. Indeed, using `read(1024)` in this manner can offer low latency, but it also exposes the signal processing section of the code to potential bugs (although you can mitigate this by utilizing the `x.size` variable instead of `bufsize`, it still may not be the optimal solution). However, with `readexactly()`, you won't notice any difference in the end. It was all conjecture 🤦‍♂️.
+- While on Linux, it is important to note that Asyncio will return immediately when observing the file descriptor, and it is not guaranteed that the `read()` method will yield enough samples. Indeed, using `read(1024)` in this manner can offer low latency, but it also exposes the signal processing section of the code to potential bugs (although you can mitigate this by utilizing the `x.size` variable instead of `bufsize`, it still may not be the optimal solution). However, with `readexactly()`, you won't notice any difference in the end. **It was all conjecture 🤦‍♂️**.
+
+- On Linux, changing the event loop from default to [uvloop](https://github.com/MagicStack/uvloop) dropped the average CPU usage by 1.5%.
 
 - 🦎 If you're aiming for low latency, consider shifting speech recognition from online to offline on the device, as demonstrated [here](https://github.com/TIT8/shelly_button_esp32_arduino/tree/master/speech_recognition). However, it's not necessarily a significantly better approach than the one I've described to you so far and it can be worst.
 
@@ -356,10 +358,11 @@ The code runs on a Raspberry Pi 4, which is connected to the microphone. The MQT
 
 Thanks to Asyncio, the [quantum leap provided by this commit](https://github.com/TIT8/BLE-sensor_PDM-microphone/commit/4413819cae1f11877874da1769ac8dc7949ca757?diff=unified&w=1), modifying the `SpeechRecognition` library to utilize the new low-latency Wit.AI API, [`urllib3`](https://urllib3.readthedocs.io/en/stable/index.html) to send requests and Paho MQTT library 2.0, I've achieved lower latency than ever before: from the voice command ("ACCENDI LUCE" or "SPEGNERE LE LUCI") to the actions in an average of 1.4 seconds (thanks, of course, to the 1GBit Ethernet on my LAN)!
 
-And these are the resource consumption metrics from the `top -i` Linux command:
+And these are the resource consumption metrics (max and min) from the `top -i` Linux command:
 
-![Screenshot (106)](https://github.com/TIT8/BLE-sensor_PDM-microphone/assets/68781644/36042cb6-9393-4d91-8219-c88ed24495de)
-![Screenshot (105)](https://github.com/TIT8/BLE-sensor_PDM-microphone/assets/68781644/cf6c0fb1-df31-4fb9-ad09-2160c3ac28f4)
+![Screenshot (110)](https://github.com/TIT8/BLE-sensor_PDM-microphone/assets/68781644/891deaad-0f69-49b3-874c-b77be734f2c4)
+![Screenshot (111)](https://github.com/TIT8/BLE-sensor_PDM-microphone/assets/68781644/4610cc2c-f1cd-4a71-8645-40c6e6702051)
+
 
 #### Try to listen to what Arduino Nano 33 BLE Sense produce:
 
@@ -386,3 +389,4 @@ Import the necessary packages into your Python environment. The packages used ar
 * [Loop signal handlers](https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.loop.add_signal_handler)
 * [Wit.AI docs](https://wit.ai/docs/http/20240304/#post__speech_link)
 * [My previous project](https://github.com/TIT8/shelly_button_esp32_arduino/tree/master/speech_recognition)
+* [Blocking and non-blocking IO](https://luminousmen.com/post/asynchronous-programming-blocking-and-non-blocking)
