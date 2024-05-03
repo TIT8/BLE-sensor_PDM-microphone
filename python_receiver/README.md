@@ -358,10 +358,11 @@ The code runs on a Raspberry Pi 4, which is connected to the microphone. The MQT
 
 Thanks to Asyncio, the [quantum leap provided by this commit](https://github.com/TIT8/BLE-sensor_PDM-microphone/commit/4413819cae1f11877874da1769ac8dc7949ca757?diff=unified&w=1), modifying the `SpeechRecognition` library to utilize the new low-latency Wit.AI API, [`urllib3`](https://urllib3.readthedocs.io/en/stable/index.html) to send requests and Paho MQTT library 2.0, I've achieved lower latency than ever before: from the voice command ("ACCENDI LUCE" or "SPEGNERE LE LUCI") to the actions in an average of 1.4 seconds (thanks, of course, to the 1GBit Ethernet on my LAN)!
 
-And these are the resource consumption metrics (max and min) from the `top -i` Linux command:
+And these are the resource consumption metrics (max and min) from the `top -i` Linux command (_rec_async.py_ is the script):
 
 ![Screenshot (110)](https://github.com/TIT8/BLE-sensor_PDM-microphone/assets/68781644/891deaad-0f69-49b3-874c-b77be734f2c4)
-![Screenshot (111)](https://github.com/TIT8/BLE-sensor_PDM-microphone/assets/68781644/4610cc2c-f1cd-4a71-8645-40c6e6702051)
+![Screenshot (113)](https://github.com/TIT8/BLE-sensor_PDM-microphone/assets/68781644/085026de-66a9-4de4-ab2d-32a9199ee62b)
+
 
 
 #### Try to listen to what Arduino Nano 33 BLE Sense produce:
