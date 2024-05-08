@@ -83,7 +83,7 @@ async def receiver(loop, serial_port_ACM):
             async with asyncio.timeout_at(deadline):
                 ## Don't hog the CPU, data transfer is in background, so reading when enough data are in the Linux buffer.
                 ## "await asyncio.sleep(0)" give control to the event loop which has nothing to do, better stop it entirely.
-                time.sleep(0.033) 
+                time.sleep(0.032) 
                 data = await reader.readexactly(bufsize * 2)    # In order to read 512 samples of 16 bit each, I need 1024 bytes
         except:
             print("Maybe a timeout, closing...")
