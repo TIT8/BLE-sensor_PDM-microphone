@@ -60,11 +60,16 @@ while event.is_set() and not stop.is_set():
     deadline = loop.time() + 2        # Timeout of two seconds, enough in my tests
     try:
         async with asyncio.timeout_at(deadline):
+            ## Don't hog the CPU, data transfer is in background, so reading when enough data are in the Linux buffer.
+            ## "await asyncio.sleep(0)" give control to the event loop which has nothing to do, better stop it entirely.
+            time.sleep(0.033)          
             data = await reader.readexactly(bufsize * 2)    # In order to read 512 samples of 16 bit each, I need 1024 bytes
     except:
         print("Maybe a timeout, closing...")
         break
 ```
+
+Whoa, `time.sleep(0.033)` in a coroutine!? It will pause the entire loop! Yes, you're right, that's exactly what I want. It's not the CPU that controls the serial data coming in, but rather the USB peripheral, DMA, and interrupt on my host (Raspberry Pi 4) via Linux. So, without sleep, the script will block on a `select()` (blocking syscall) and restart when the file descriptor is ready to read. `readexactly()` will constantly block on `select()` until the exact number of bytes are read. However, if we sleep, the CPU can handle other tasks while the input buffer is filled by external hardware. This hardware will notify Linux, which will unblock the `select()` in our script. After sleeping, our script is free to read. At this point, enough data will be in the input buffer to prevent further blocking on `select()`, since we've already paused via sleep, and processing can begin.
 
 **But wait, the `pyserial` package doesn't have a `readexactly()` method!**  
 Yes, this method is called on the `StreamReader` instance, which is passed to the [`create_serial_connection`](https://github.com/home-assistant-libs/pyserial-asyncio-fast/blob/c3153083a5fb734f4361215ce404a2421b2664b7/serial_asyncio_fast/__init__.py#L474) coroutine through a [`StreamReaderProtocol`](https://github.com/python/cpython/blob/692e902c742f577f9fc8ed81e60ed9dd6c994e1e/Lib/asyncio/streams.py#L180). Every time data is received, the loop will call the `data_received()` method of the `StreamReaderProtocol`, which passes data to the `StreamReader` instance. The `StreamReader` instance checks if the exact bytes are received, and if so, it returns to the awaiter (our reader).
@@ -356,13 +361,16 @@ def ask_exit():
 
 The code runs on a Raspberry Pi 4, which is connected to the microphone. The MQTT section will connect to the broker already running on the Raspberry Pi, which is why I'm connecting to 'localhost'.
 
-Thanks to Asyncio, uvloop, the [quantum leap provided by this commit](https://github.com/TIT8/BLE-sensor_PDM-microphone/commit/4413819cae1f11877874da1769ac8dc7949ca757?diff=unified&w=1), modifying the `SpeechRecognition` library to utilize the new low-latency Wit.AI API, [`urllib3`](https://urllib3.readthedocs.io/en/stable/index.html) to send requests and Paho MQTT library 2.0, I've achieved lower latency than ever before: from the voice command ("ACCENDI LUCE" or "SPEGNERE LE LUCI") to the actions in an average of 1.4 seconds (thanks, of course, to the 1GBit Ethernet on my LAN)!
+Thanks to Asyncio, uvloop, the [quantum leap provided by this commit](https://github.com/TIT8/BLE-sensor_PDM-microphone/commit/4413819cae1f11877874da1769ac8dc7949ca757?diff=unified&w=1), modifying the `SpeechRecognition` library to utilize the new low-latency Wit.AI API, [`urllib3`](https://urllib3.readthedocs.io/en/stable/index.html) to send requests and Paho MQTT library 2.0, stopping the event loop to wait for enough data in the input serial buffer, I've achieved lower latency than ever before: from the voice command ("ACCENDI LUCE" or "SPEGNERE LE LUCI") to the actions in an average of 1.4 seconds (thanks, of course, to the 1GBit Ethernet on my LAN)!
 
-And these are the resource consumption metrics (max and min) from the `top -i` Linux command (_rec_async.py_ is the script):
+The resource consumption metrics coming from the `top -i` Linux command say:
 
-![Screenshot (110)](https://github.com/TIT8/BLE-sensor_PDM-microphone/assets/68781644/891deaad-0f69-49b3-874c-b77be734f2c4)
-![Screenshot (113)](https://github.com/TIT8/BLE-sensor_PDM-microphone/assets/68781644/085026de-66a9-4de4-ab2d-32a9199ee62b)
+- max 1.7% of CPU usage
+- min 0% of CPU usage
+- average 0.7% of CPU usage
+- 1.4-1.5% of memory usage
 
+See the [Go data]() about this.
 
 
 #### Try to listen to what Arduino Nano 33 BLE Sense produce:
