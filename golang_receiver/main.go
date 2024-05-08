@@ -46,7 +46,7 @@ func readexactly(n int, ser serial.Port) ([]byte, error) {
 	var i = 0
 
 	for i < n {
-		time.Sleep(33 * time.Millisecond)
+		time.Sleep(32 * time.Millisecond)
 		num, err := ser.Read(data)
 		if err != nil {
 			log.Println(err)
