@@ -299,7 +299,8 @@ func main() {
 		data := make([]byte, size*2)
 
 		for global {
-			time.Sleep(33 * time.Millisecond)
+			time.Sleep(32 * time.Millisecond)
+			// _, err := io.ReadAtLeast(ser, data, size*2)
 			_, err := ser.Read(data)
 			if err != nil {
 				log.Println(err)
