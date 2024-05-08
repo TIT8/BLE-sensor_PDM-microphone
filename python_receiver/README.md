@@ -370,7 +370,7 @@ The resource consumption metrics coming from the `top -i` Linux command say:
 - average 0.7% of CPU usage
 - 1.4-1.5% of memory usage
 
-See the [Go data]() about this.
+See the [Go data](https://github.com/TIT8/BLE-sensor_PDM-microphone/tree/master/golang_receiver#cpu-and-memory-usage-from-top--i-command) about this.
 
 
 #### Try to listen to what Arduino Nano 33 BLE Sense produce:
