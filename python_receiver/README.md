@@ -361,7 +361,7 @@ def ask_exit():
 
 The code runs on a Raspberry Pi 4, which is connected to the microphone. The MQTT section will connect to the broker already running on the Raspberry Pi, which is why I'm connecting to 'localhost'.
 
-Thanks to Asyncio, uvloop, the [quantum leap provided by this commit](https://github.com/TIT8/BLE-sensor_PDM-microphone/commit/4413819cae1f11877874da1769ac8dc7949ca757?diff=unified&w=1), modifying the `SpeechRecognition` library to utilize the new low-latency Wit.AI API, [`urllib3`](https://urllib3.readthedocs.io/en/stable/index.html) to send requests and Paho MQTT library 2.0, stopping the event loop to wait for enough data in the input serial buffer, I've achieved lower latency than ever before: from the voice command ("ACCENDI LUCE" or "SPEGNERE LE LUCI") to the actions in an average of 1.4 seconds (thanks, of course, to the 1GBit Ethernet on my LAN)!
+Thanks to Asyncio, uvloop, the [quantum leap provided by this commit](https://github.com/TIT8/BLE-sensor_PDM-microphone/commit/4413819cae1f11877874da1769ac8dc7949ca757?diff=unified&w=1), modifying the `SpeechRecognition` library to utilize the new low-latency Wit.AI API, [`urllib3`](https://urllib3.readthedocs.io/en/stable/index.html) to send requests and Paho MQTT library 2.0, [stopping the event loop](https://github.com/TIT8/BLE-sensor_PDM-microphone/blob/54fb723daaa551d91cb6c5847d90bf18c8af6bf6/python_receiver/recognizer.py#L84) to wait for enough data in the input serial buffer, I've achieved lower latency than ever before: from the voice command ("ACCENDI LUCE" or "SPEGNERE LE LUCI") to the actions in an average of 1.4 seconds (thanks, of course, to the 1GBit Ethernet on my LAN)!
 
 The resource consumption metrics coming from the `top -i` Linux command say:
 
