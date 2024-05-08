@@ -46,7 +46,7 @@ func readexactly(n int, ser serial.Port) ([]byte, error) {
 	var i = 0
 
 	for i < n {
-		time.Sleep(32 * time.Millisecond)
+		time.Sleep(33 * time.Millisecond)
 		num, err := ser.Read(data)
 		if err != nil {
 			log.Println(err)
@@ -70,6 +70,8 @@ func wav_wit(r chan []byte, m chan string) {
 
 	wfmt := wave.NewWaveFmt(format, channels, samplerate, bitpersample, extraparams)
 
+	var client = new(http.Client)
+
 	for {
 		buff = <-r
 		if buff == nil {
@@ -83,7 +85,6 @@ func wav_wit(r chan []byte, m chan string) {
 		err = wave.WriteWaveToWriter(float_data, wfmt, writer)
 		check(err)
 
-		var client = new(http.Client)
 		req, err := http.NewRequest("POST", "https://api.wit.ai/dictation", writer)
 		check(err)
 
@@ -92,7 +93,6 @@ func wav_wit(r chan []byte, m chan string) {
 
 		resp, err := client.Do(req)
 		check(err)
-		defer resp.Body.Close()
 
 		body, err := io.ReadAll(resp.Body)
 		check(err)
@@ -114,13 +114,19 @@ func wav_wit(r chan []byte, m chan string) {
 				if strings.Contains(strings.ToLower(text), "luc") {
 					if strings.Contains(strings.ToLower(text), "accend") {
 						m <- "on"
+						break
 					} else if strings.Contains(strings.ToLower(text), "spegn") {
 						m <- "off"
+						break
 					}
 				}
 			}
 		}
 
+		err = resp.Body.Close()
+		check(err)
+
+		client.CloseIdleConnections()
 		writer.Reset()
 	}
 
@@ -169,6 +175,7 @@ func mqtt_func(m chan string) {
 	}
 
 	client.Disconnect(250)
+	log.Println("Closing MQTT client")
 	time.Sleep(500 * time.Millisecond)
 	log.Println("Exiting mqtt goroutine...")
 }
@@ -184,7 +191,7 @@ func dsp(c, r chan []byte) {
 	y := make([]int16, 0, size*conversion*seconds_toreset)
 	z := make([]int16, 0, int((listening_for+1)*float64(conversion)*float64(size)))
 	i, samp := 0, false
-	trigger_volume := 17000
+	trigger_volume := 18000
 
 	for {
 		data := <-c
@@ -320,6 +327,7 @@ func main() {
 			*/
 		}
 		err = ser.Close()
+		log.Println("Closing serial")
 		check(err)
 		time.Sleep(6 * time.Second)
 	}
