@@ -17,6 +17,6 @@ The difference lies in how the _[c|g]oroutines_ are scheduled by Go and Python r
 
 - <ins>In Go, using slices directly is very fast</ins>; `append` is much faster than `numpy.append()` in Python. Therefore, in Python, I have to preallocate the numpy array and then use powerful slicing indexes. Conversely, in Go, I can append to slices directly, which is more robust when reading less than 1024 bytes at a time, while in Python, `readexactly()` from the stream is necessary before processing.
 
-- Much easier make the code to work on multiple OS in Go.
+- Much easier to make the code working on multiple OS in Go.
 
 [^1]: Why wait is a simple question, but the [answer](https://github.com/0xAX/linux-insides/blob/master/SUMMARY.md) is long. Good reading.
