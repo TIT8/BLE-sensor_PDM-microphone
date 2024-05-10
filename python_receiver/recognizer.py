@@ -17,7 +17,9 @@ from threading import Thread
 from queue import Queue
 import paho.mqtt.client as mqtt
 import paho.mqtt.publish as publish
-import uvloop
+
+if os.name == "posix":
+    import uvloop
 
 
 
@@ -25,7 +27,8 @@ import uvloop
     Global variables
 '''
 
-asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())    # Only for Linux
+if os.name == "posix":
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())    # Only for Linux
 
 # Threading controls
 audio_queue = Queue()
@@ -60,7 +63,7 @@ async def receiver(loop, serial_port_ACM):
     i = 0
     n = 0
     listening_for = 1.5   # * conversion == [second/bufsize]
-    trigger_volume = 17000  # If the audio samples have magnitude greater than this start listening
+    trigger_volume = 18000  # If the audio samples have magnitude greater than this start listening
 
     # Preparing buffers
     y = np.zeros(int(N), np.int16)
@@ -81,8 +84,12 @@ async def receiver(loop, serial_port_ACM):
         deadline = loop.time() + 2    # Timeout of two seconds
         try:
             async with asyncio.timeout_at(deadline):
-                ## Don't hog the CPU, data transfer is in background, so reading when enough data are in the Linux buffer.
-                ## "await asyncio.sleep(0)" give control to the event loop which has nothing to do, better stop it entirely.
+                # Don't hog the CPU, data transfer is in background, so reading when enough data are in the Linux buffer.
+                # "await asyncio.sleep(0)" give control to the event loop which has nothing to do, better stop it entirely.
+                # Only true on Linux, where pyserial block on a select() syscall, on windows pyserial asyncio poll every 5ms
+                # the serial device, so it's already a waste of resources, with or without time.sleep(0.032),
+                # but still time.sleep() will ease the load on the CPU, because the transfer of data happend asynchronously in
+                # background, so waiting for enough data is always useful for my purposes.
                 time.sleep(0.032) 
                 data = await reader.readexactly(bufsize * 2)    # In order to read 512 samples of 16 bit each, I need 1024 bytes
         except:
@@ -164,7 +171,7 @@ def recognize_worker():
         # recognize speech using Wit.ai
         WIT_AI_KEY = engine_KEY  # Wit.ai keys are 32-character uppercase alphanumeric strings
         try:
-            voice = str(r.recognize_wit_new(audio, key=WIT_AI_KEY)).lower()         
+            voice = str(r.recognize_wit(audio, key=WIT_AI_KEY)).lower()         
         except sr.UnknownValueError:
             print("Wit.ai could not understand audio")
         except sr.RequestError as e:
@@ -223,6 +230,22 @@ def ask_exit():
     time.sleep(1)
     mqttc.disconnect()      # Stop the MQTT loop on the other thread
     mqttc.loop_stop()
+    print("Exiting...")
+    
+# Cross Platform
+def ask_exit_win(a,b):
+    global audio_queue
+    global event
+    global stop
+    global mqttc
+
+    event.clear()           # Stop coroutine
+    audio_queue.put(None)   # Stop the recognizer worker
+    stop.set()              # Gracefully stop the loop and all other asyncio task in background
+    time.sleep(1)
+    mqttc.disconnect()      # Stop the MQTT loop on the other thread
+    mqttc.loop_stop()
+    time.sleep(1)
     print("Exiting...")
 
 
@@ -289,23 +312,28 @@ def loop():
         for serial_port_name in serial_ports():
             if "ACM" in serial_port_name:
                 serial_port = serial_port_name
-                
-        subprocess.run(["fuser", "-k", serial_port])    # Kill process that are using the MIC, if any
+            elif "COM7" in serial_port_name:        # On Windows you must give the correct port where to look
+                serial_port = serial_port_name
+        
+        if os.name == "posix": 
+            subprocess.run(["fuser", "-k", serial_port])    # Kill process that are using the MIC, if any
         time.sleep(1)   # Give the OS time to start other services
         
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-            
-        for sig in (signal.SIGINT, signal.SIGTERM):
-            loop.add_signal_handler(sig, ask_exit)      # Handle external signal, also SIGTERM from OS
-
+        
+        if os.name == "posix":    
+            for sig in (signal.SIGINT, signal.SIGTERM):
+                loop.add_signal_handler(sig, ask_exit)      # Handle external signal, also SIGTERM from OS
+        
         try:
             loop.run_until_complete(receiver(loop, serial_port))
         except:
             pass
 
-        for sig in (signal.SIGINT, signal.SIGTERM):
-            loop.remove_signal_handler(sig)
+        if os.name == "posix":
+            for sig in (signal.SIGINT, signal.SIGTERM):
+                loop.remove_signal_handler(sig)
 
         while not audio_queue.empty():
             audio_queue.get()           # Empty the queue to restart listening wihtout interfering with old samples
@@ -325,9 +353,13 @@ def main():
     
     mqttc_init()
     rec_worker_init()
+    if os.name == "nt":
+        signal.signal(signal.SIGINT, ask_exit_win)
+        signal.signal(signal.SIGTERM, ask_exit_win)
     loop()
 
 
 if __name__ == "__main__":
     main()
+    time.sleep(1)
     print("Service stopped")    # If read on the systemctl status log mean "the script stopped gracefully"
