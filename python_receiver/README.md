@@ -399,3 +399,4 @@ Import the necessary packages into your Python environment. The packages used ar
 * [Wit.AI docs](https://wit.ai/docs/http/20240304/#post__speech_link)
 * [My previous project](https://github.com/TIT8/shelly_button_esp32_arduino/tree/master/speech_recognition)
 * [Blocking and non-blocking IO](https://luminousmen.com/post/asynchronous-programming-blocking-and-non-blocking)
+* [How AsyncIO actually work](https://stackoverflow.com/questions/49005651/how-does-asyncio-actually-work)
