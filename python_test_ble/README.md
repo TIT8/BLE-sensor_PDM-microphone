@@ -8,7 +8,7 @@
 
 3) Open a new terminal in that folder and type:
 
-    General (I've set this <[Name of the device](https://github.com/TIT8/BLE-sensor_PDM-microphone/blob/279eed03539bcb7410006116519fe02829c34209/src/main.cpp#L148)> and <[UUID](https://github.com/TIT8/BLE-sensor_PDM-microphone/blob/279eed03539bcb7410006116519fe02829c34209/src/main.cpp#L37)>, for example):
+    General (I've set this <[Name of the device](https://github.com/TIT8/BLE-sensor_PDM-microphone/blob/279eed03539bcb7410006116519fe02829c34209/src/main.cpp#L148)> and <[UUID](https://github.com/TIT8/BLE-sensor_PDM-microphone/blob/279eed03539bcb7410006116519fe02829c34209/src/main.cpp#L37)>, for example, ***if you don't set these two command line arguments, they will be used as default***):
    
    ```bash
     python test.py --name "<Name of the device>" "<UUID>"

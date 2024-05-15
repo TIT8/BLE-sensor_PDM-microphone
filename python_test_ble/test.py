@@ -4,11 +4,13 @@ import logging
 import signal
 import os
 import sys
+if os.name == "nt": import keyboard
 from concurrent.futures.thread import ThreadPoolExecutor
 
 from bleak import BleakClient, BleakScanner
 from bleak.backends.characteristic import BleakGATTCharacteristic
 from bleak import uuids
+from bleak import exc
 
 logger = logging.getLogger(__name__)
 condition = False
@@ -64,34 +66,45 @@ async def main(args: argparse.Namespace):
 
     def disconnected_callback(client):
         disconnected_event.set()
-        if condition == True:
+        if condition:
                 logger.warning("BLE server disconnected!")
         else:
             if os.name == 'posix':
                 logger.warning("BLE server disconnected! Please, press <CTRL+D> or <Enter> to finish")
             else:
-                logger.warning("BLE server disconnected! Please, press <Enter> to finish")
+                logger.warning("BLE server disconnected!")
+                loop = asyncio.get_event_loop()
+                loop.call_soon(keyboard.send, 'enter')
 
     # Connection with the device requested
     async with BleakClient(device, disconnected_callback) as client:
         logger.info("Connected")
+        err = False
 
         # Convert the standard UUID to UUID used by Break API
         uuid = uuids.normalize_uuid_16(int(args.characteristic, 16))
-        await client.start_notify(uuid, notification_handler)
+        try:
+            await client.start_notify(uuid, notification_handler)
+        except exc.BleakCharacteristicNotFoundError:
+            logger.error("Characteristic not found, closing...")
+            disconnected_event.set()
+            err = True
 
-        # Search for the desired descriptor 
-        descriptor = ''
-        service = client.services
-        for d in service.descriptors:
-            s = await client.read_gatt_descriptor(d)
-            if "humidity" in str(s).lower():
-                descriptor = s
+        if not err: 
+            # Search for the desired descriptor 
+            descriptor = ''
+            service = client.services
+            for d in service.descriptors:
+                s = await client.read_gatt_descriptor(d)
+                if "humidity" in str(s).lower():
+                    descriptor = s
+            
+            print('Write "read" at any time if you want to read the BLE data')
 
         # Until stopped, give to the other coroutines chances to run,
         # since AsynIO uses a cooperative multitasking model, so the
         # while loop must block sometimes
-        print('Write "read" at any time if you want to read the BLE data')
+        await asyncio.sleep(0.5)
         while not condition and not disconnected_event.is_set(): 
             # Make possible to read the Characteristic even when nothing get notified
             line = await async_read_stdin()
@@ -123,10 +136,11 @@ if __name__ == "__main__":
     
     # Inform the user about what he has to write on the terminal
     parser = argparse.ArgumentParser()
-    device_group = parser.add_mutually_exclusive_group(required=True)
+    device_group = parser.add_mutually_exclusive_group(required=False)
 
     device_group.add_argument(
         "--name",
+        default="Humidity monitor",
         metavar="<name>",
         help="the name of the bluetooth device to connect to",
     )
@@ -144,6 +158,8 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "characteristic",
+        nargs="?",
+        default="0x2A6F",
         metavar="<notify uuid>",
         help="UUID of a characteristic that supports notifications",
     )
