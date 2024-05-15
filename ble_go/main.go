@@ -93,23 +93,7 @@ func disconnect_handler(device bluetooth.Device, connected bool) {
 	}
 }
 
-func main() {
-	fmt.Println(operating_system)
-	c := make(chan os.Signal, 1)
-	f := make(chan bluetooth.Device)
-	ch := make(chan bluetooth.ScanResult, 1)
-	done := make(chan bool)
-
-	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT)
-	go func() {
-		<-c
-		fmt.Println("Stop signal detected, closing...")
-		time.Sleep(1 * time.Second)
-		done <- true
-	}()
-
-	go connection_handler(done, f, c)
-
+func scanner(ch chan bluetooth.ScanResult, c chan os.Signal) {
 	must("enable BLE stack", adapter.Enable())
 
 	flag.StringVar(&flagname, "name", "Humidity monitor", "You have to insert the name of the BLE central, otherwise \"Humidity monitor\" will be used as default")
@@ -124,19 +108,39 @@ func main() {
 			println("Found device:", device.Address.String(), device.RSSI, device.LocalName())
 			must("stop scan", adapter.StopScan())
 			ch <- device
-			return
 		} else if time.Since(start)-time.Duration(start.Nanosecond()) > 10*time.Second && condition {
 			must("stop scan", adapter.StopScan())
 			condition = false
 			fmt.Println("Device not found")
+			close(ch)
 			c <- syscall.SIGINT
 		}
 	})
 	must("start scan", err)
+}
+
+func main() {
+	fmt.Println(operating_system)
+	c := make(chan os.Signal, 1)
+	f := make(chan bluetooth.Device)
+	ch := make(chan bluetooth.ScanResult)
+	done := make(chan bool)
+
+	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT)
+	go func() {
+		<-c
+		fmt.Println("Stop signal detected, closing...")
+		time.Sleep(1 * time.Second)
+		done <- true
+	}()
+
+	go connection_handler(done, f, c)
+	go scanner(ch, c)
 
 	var d bluetooth.Device
-	if condition {
-		result := <-ch
+	var err error
+	result, ok := <-ch
+	if ok {
 		adapter.SetConnectHandler(disconnect_handler)
 		d, err = adapter.Connect(result.Address, bluetooth.ConnectionParams{})
 		must("connect to device", err)
@@ -148,7 +152,7 @@ func main() {
 	time.Sleep(1 * time.Second)
 	if condition {
 		must("disconnection", d.Disconnect())
-		time.Sleep(6 * time.Second)
+		time.Sleep(5 * time.Second)
 		fmt.Println("BLE disconnected")
 	}
 }
