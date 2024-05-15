@@ -88,6 +88,11 @@ void setup()
 
 /*
   PDM thread (on the main one)
+  Please note that here I could check the volume of incoming samples and decide when to send data over Serial. 
+  For example, when the volume exceeds a certain value, I can begin sampling ('memcpy') into a new buffer 
+  the sampleBuffer, which is constantly changing, and then send only this over Serial. However, I have limited space
+  in memory, so I prefer to always send what I receive and delegate this aspect to the Golang/Python receiver.
+  Just for reference check this  ->  https://stackoverflow.com/questions/70163442/c-memcpy-to-the-end-of-a-buffer.
 */
 
 void loop()
