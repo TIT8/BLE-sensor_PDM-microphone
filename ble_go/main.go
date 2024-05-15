@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"runtime"
 	"strings"
 	"syscall"
 	"time"
@@ -16,10 +17,11 @@ import (
 )
 
 var (
-	adapter   = bluetooth.DefaultAdapter
-	flaguuid  int
-	flagname  string
-	condition = true
+	adapter          = bluetooth.DefaultAdapter
+	flaguuid         int
+	flagname         string
+	condition        = true
+	operating_system = runtime.GOOS
 )
 
 func must(action string, err error) {
@@ -49,7 +51,9 @@ func read_char(char []bluetooth.DeviceCharacteristic, c chan os.Signal) {
 				break
 			}
 			if i > 0 {
-				callback(data)
+				if operating_system == "windows" {
+					callback(data)
+				}
 			}
 		}
 	}
@@ -90,9 +94,10 @@ func disconnect_handler(device bluetooth.Device, connected bool) {
 }
 
 func main() {
+	fmt.Println(operating_system)
 	c := make(chan os.Signal, 1)
 	f := make(chan bluetooth.Device)
-	ch := make(chan bluetooth.ScanResult)
+	ch := make(chan bluetooth.ScanResult, 1)
 	done := make(chan bool)
 
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT)
@@ -119,6 +124,7 @@ func main() {
 			println("Found device:", device.Address.String(), device.RSSI, device.LocalName())
 			must("stop scan", adapter.StopScan())
 			ch <- device
+			return
 		} else if time.Since(start)-time.Duration(start.Nanosecond()) > 10*time.Second && condition {
 			must("stop scan", adapter.StopScan())
 			condition = false
@@ -132,7 +138,7 @@ func main() {
 	if condition {
 		result := <-ch
 		adapter.SetConnectHandler(disconnect_handler)
-		d, err = adapter.Connect(result.Address, bluetooth.ConnectionParams{ConnectionTimeout: bluetooth.NewDuration(2 * time.Second), Timeout: bluetooth.NewDuration(3 * time.Second)})
+		d, err = adapter.Connect(result.Address, bluetooth.ConnectionParams{})
 		must("connect to device", err)
 		println("Connected to ", result.LocalName())
 		f <- d

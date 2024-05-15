@@ -4,16 +4,17 @@ import logging
 import signal
 import os
 import sys
-if os.name == "nt": import keyboard
+from pynput.keyboard import Key, Controller
 from concurrent.futures.thread import ThreadPoolExecutor
 
 from bleak import BleakClient, BleakScanner
 from bleak.backends.characteristic import BleakGATTCharacteristic
-from bleak import uuids
-from bleak import exc
+from bleak import uuids, exc
+
 
 logger = logging.getLogger(__name__)
 condition = False
+keyboard = Controller()
 
 
 # Handle CTRL+C and other stop signals
@@ -74,7 +75,7 @@ async def main(args: argparse.Namespace):
             else:
                 logger.warning("BLE server disconnected!")
                 loop = asyncio.get_event_loop()
-                loop.call_soon(keyboard.send, 'enter')
+                loop.call_soon(keyboard.tap, Key.enter)
 
     # Connection with the device requested
     async with BleakClient(device, disconnected_callback) as client:
