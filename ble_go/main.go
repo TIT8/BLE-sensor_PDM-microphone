@@ -148,7 +148,7 @@ func main() {
 	time.Sleep(1 * time.Second)
 	if condition {
 		must("disconnection", d.Disconnect())
-		time.Sleep(1 * time.Second)
+		time.Sleep(6 * time.Second)
 		fmt.Println("BLE disconnected")
 	}
 }
