@@ -62,6 +62,8 @@ The two minus can be improved in two ways: if you desire low latency and quick r
 
 2) An intermediate solution could be to maintain the speech recognition on external hardware instead of the nRF52840, utilizing an offline speech recognition engine such as [PocketSphinx](https://pocketsphinx.readthedocs.io/en/latest/) (tested and not working, I'm still a beginner) or [Vosk](https://github.com/alphacep/vosk-api) (although it's a bit tricky to get started with, this [demo](https://github.com/anuran-roy/vosk-demo) can be helpful, **though it hasn't proven entirely reliable in my tests**). But I think that transcriptor as good as Wit.Ai are difficult to find for this application, at least for the italian language. ***And there is a big [BUT](https://github.com/TIT8/BLE-sensor_PDM-microphone/tree/master/python_receiver#be-careful-with-timeouts) if you want to use this solution with my Python-receiver code***. Actually, this solution can increase latency if you don't have proper hardware.
 
+3) You can also train your neural network with Tensorflow to recognize specific word and let it work on the external hardware. Tensorflow has a good [starting point](https://www.tensorflow.org/tutorials/audio/simple_audio) with [pre-trained models](https://www.tensorflow.org/tutorials/audio/transfer_learning_audio). Now (4 months after trying only point 1 and 2) I understand better the world of classification problems and this solution can be more effective than **2**.
+
 So, life is full of trade-offs. We're lucky to have more than one solution :lying_face:.
 
 
